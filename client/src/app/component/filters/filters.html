@@ -1,0 +1,37 @@
+<div class="filters-container">
+    <div class="filter-content">
+        <!-- Search with Toolbar style -->
+        <div class="filter-section">
+            
+            <div class="p-toolbar-group-left search-wrapper">
+                <span class="p-input-icon-left">
+                    <i class="pi pi-search"></i>
+                    <input type="text" pInputText placeholder="Search..." 
+                           [(ngModel)]="searchTerm" (input)="onSearchChange()" class="search-input" />
+                </span>
+            </div>
+        </div>
+
+        <!-- Categories -->
+        <div class="filter-section">
+            <label class="section-label">Select category:</label>
+            <p-listbox [options]="categories" [(ngModel)]="selectedCategories" 
+                      [multiple]="true" [checkbox]="true" optionLabel="categoryName" 
+                      [showToggleAll]="false"
+                      (onChange)="updateFilters()" [listStyle]="{'max-height':'250px'}">
+            </p-listbox>
+        </div>
+
+        <!-- Price Range -->
+        <div class="filter-section">
+            <label class="section-label">Select price range:</label>
+            <div class="price-range-label">{{rangeValues[0]}}₪ - {{rangeValues[1]}}₪</div>
+            <p-slider [(ngModel)]="rangeValues" [range]="true" [min]="0" [max]="15000" 
+                      (onSlideEnd)="updateFilters()"></p-slider>
+        </div>
+
+        <!-- Reset Button -->
+        <p-button label="Reset Filters" icon="pi pi-refresh" (onClick)="reset()" 
+                  [style]="{'width':'100%'}" severity="secondary"></p-button>
+    </div>
+</div>

@@ -1,0 +1,20 @@
+Create for me unit test and integration test using moq:
+This is my User repository
+and entity
+add function that return empty list when users is no exist
+function that return null when password is not valid
+
+Create unit test and integration test using moq:
+This is my Category repository
+and entity
+add function that return empty list when there is no content
+
+Create unit test and integration test using moq:
+This is my Product repository
+and entity
+add function that return empty list when there is no content
+
+Create unit test and integration test using moq:
+This is my Order repository
+and entity
+

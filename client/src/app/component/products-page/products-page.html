@@ -1,0 +1,44 @@
+<div class="page-wrapper">
+  <!-- Top Header Bar -->
+  <div class="top-header">
+    <div class="animated-text-container">
+      <div class="animated-text">
+        <span>Dreams escapes Dreams escapes Dreams escapes Dreams escapes Dreams escapes Dreams escapes</span>
+      </div>
+    </div>
+    <div class="header-icons">
+      <button class="icon-button" title="Shopping Cart">
+        <i class="pi pi-shopping-cart"></i>
+      </button>
+      <button class="icon-button" title="User Profile">
+        <i class="pi pi-user"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="page-layout">
+    <app-filters (filtersChanged)="onFiltersChanged($event)"></app-filters>
+
+    <div class="products-section">
+      <div class="products-grid">
+        <app-product-card 
+            *ngFor="let p of displayProducts; trackBy: trackByProductId" 
+            [product]="p" 
+            (addToCartClick)="openQuickView(p)">
+        </app-product-card>
+      </div>
+
+      <div *ngIf="displayProducts.length === 0" class="no-products">
+        <i class="pi pi-inbox" style="font-size: 3rem; color: #ccc;"></i>
+        <p>No products found.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<app-product-quick-view 
+  *ngIf="selectedProduct && displayDialog"
+  [(visible)]="displayDialog" 
+  [product]="selectedProduct">
+</app-product-quick-view>

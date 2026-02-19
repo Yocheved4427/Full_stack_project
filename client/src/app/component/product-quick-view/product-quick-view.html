@@ -1,0 +1,76 @@
+<p-dialog [(visible)]="visible" (onHide)="close()" [modal]="true" [header]="product?.productName" [style]="{width: '1400px', maxWidth: '98vw'}" [contentStyle]="{padding: '2rem'}">
+  <div class="quick-view-content" *ngIf="product">
+    
+    <div class="gallery" *ngIf="images.length > 0">
+      <!-- Main image display -->
+      <div class="main-image-container">
+        <button class="nav-button nav-left" (click)="previousImage()" *ngIf="images.length > 1">
+          ‹
+        </button>
+        
+        <img [src]="images[activeIndex].itemImageSrc" 
+             [alt]="images[activeIndex].alt" 
+             class="main-image" />
+        
+        <button class="nav-button nav-right" (click)="nextImage()" *ngIf="images.length > 1">
+          ›
+        </button>
+      </div>
+      
+      <!-- Thumbnails -->
+      <div class="thumbnails-container" *ngIf="images.length > 1">
+        <div class="thumbnail" 
+             *ngFor="let img of images; let i = index"
+             [class.active]="i === activeIndex"
+             (click)="activeIndex = i">
+          <img [src]="img.thumbnailImageSrc" [alt]="img.alt" />
+        </div>
+      </div>
+      
+      <!-- Indicators -->
+      <div class="indicators" *ngIf="images.length > 1">
+        <span *ngFor="let img of images; let i = index" 
+              [class.active]="i === activeIndex"
+              (click)="activeIndex = i">
+        </span>
+      </div>
+    </div>
+
+    <div class="details">
+      <div class="description">
+        <p>{{product.description}}</p>
+      </div>
+      
+      <div class="field-group">
+        <div class="field">
+          <label>Start Date:</label>
+          <p-datepicker [(ngModel)]="startDate" [minDate]="minDate" placeholder="Select start date" [style]="{width: '100%'}"></p-datepicker>
+        </div>
+
+        <div class="field">
+          <label>End Date:</label>
+          <p-datepicker [(ngModel)]="endDate" [minDate]="startDate || minDate" placeholder="Select end date" [style]="{width: '100%'}"></p-datepicker>
+        </div>
+      </div>
+
+      <div class="field participants-field">
+        <label>Number of Participants:</label>
+        <p-inputNumber [(ngModel)]="participants" [min]="1" [max]="20" [showButtons]="true" buttonLayout="horizontal" [step]="1" 
+                       showButtonBar="true"
+                       [inputStyle]="{width: '50px', textAlign: 'center'}" 
+                       [style]="{width: '140px'}">
+        </p-inputNumber>
+      </div>
+
+      <div class="summary-card" *ngIf="totalNights > 0">
+        <div class="summary-line"><span>Nights:</span> <strong>{{totalNights}}</strong></div>
+        <div class="summary-line"><span>Participants:</span> <strong>{{participants}}</strong></div>
+        <div class="total-line"><span>Total Price:</span> <strong>{{totalPrice | currency}}</strong></div>
+      </div>
+
+      <button pButton label="Add to Cart" icon="pi pi-shopping-cart" class="add-to-cart-btn" 
+              [disabled]="!isFormValid()"></button>
+
+    </div>
+  </div>
+</p-dialog>

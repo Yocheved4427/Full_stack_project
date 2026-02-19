@@ -1,0 +1,35 @@
+<div class="card-wrapper">
+    <p-card [style]="{ width: '100%', overflow: 'hidden' }">
+        
+        <ng-template pTemplate="header">
+            <img 
+                [alt]="product.productName" 
+                class="w-full" 
+                [src]="product.mainImageUrl" 
+                style="height: 180px; object-fit: cover;" 
+                onerror="this.src='https://primefaces.org/cdn/primeng/images/card-ng.jpg'" />
+        </ng-template>
+
+        <ng-template pTemplate="title"> 
+            <div class="card-title-center">{{ product.productName }}</div> 
+        </ng-template>
+
+        <ng-template pTemplate="footer">
+            <div class="footer-actions">
+                <div class="price-display">
+                    {{ product.price | currency:'ILS':'symbol':'1.0-0' }}
+                </div>
+                
+                <div class="button-wrapper">
+                    <p-button 
+                        label="View" 
+                        icon="pi pi-eye" 
+                        iconPos="left"
+                        (onClick)="onAddToCart()"> 
+                    </p-button>
+                </div>
+            </div>
+        </ng-template>
+
+    </p-card>
+</div>
