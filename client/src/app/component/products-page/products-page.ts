@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ProductCard } from '../product-card/product-card.component';
 import { ProductService } from '../../services/product.service';
@@ -33,7 +33,7 @@ export class ProductsPageComponent implements OnInit, OnDestroy {
   
   private destroy$ = new Subject<void>();
 
-  constructor(private productService: ProductService) {}
+  constructor(private productService: ProductService, private cdr: ChangeDetectorRef) {}
 
   ngOnInit() {
     // Load all products once
@@ -42,6 +42,7 @@ export class ProductsPageComponent implements OnInit, OnDestroy {
   
   loadProducts() {
     this.isLoading = true;
+    this.cdr.detectChanges();
     this.productService.getProducts({ page: 0, pageSize: 100 }).pipe(
       takeUntil(this.destroy$)
     ).subscribe({
@@ -57,12 +58,14 @@ export class ProductsPageComponent implements OnInit, OnDestroy {
           this.displayProducts = [];
         }
         this.isLoading = false;
+        this.cdr.detectChanges();
       },
       error: (error) => {
         console.error('Error loading products:', error);
         this.isLoading = false;
         this.allProducts = [];
         this.displayProducts = [];
+        this.cdr.detectChanges();
       }
     });
   }
