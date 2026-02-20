@@ -37,20 +37,32 @@ export class ProductsPageComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     // Load all products once
+    this.loadProducts();
+  }
+  
+  loadProducts() {
     this.isLoading = true;
-    this.productService.getProducts({ page: 0, pageSize: 1000 }).pipe(
+    this.productService.getProducts({ page: 0, pageSize: 100 }).pipe(
       takeUntil(this.destroy$)
     ).subscribe({
       next: (response: any) => {
-        if (response && response.data) {
+        console.log('Products response:', response);
+        if (response && response.data && Array.isArray(response.data)) {
           this.allProducts = response.data;
           this.displayProducts = response.data;
+          console.log('Loaded products:', this.displayProducts.length);
+        } else {
+          console.warn('No data in response or not an array');
+          this.allProducts = [];
+          this.displayProducts = [];
         }
         this.isLoading = false;
       },
       error: (error) => {
         console.error('Error loading products:', error);
         this.isLoading = false;
+        this.allProducts = [];
+        this.displayProducts = [];
       }
     });
   }

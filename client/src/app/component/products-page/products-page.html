@@ -29,9 +29,14 @@
         </app-product-card>
       </div>
 
-      <div *ngIf="displayProducts.length === 0" class="no-products">
+      <div *ngIf="!isLoading && displayProducts.length === 0" class="no-products">
         <i class="pi pi-inbox" style="font-size: 3rem; color: #ccc;"></i>
         <p>No products found.</p>
+      </div>
+      
+      <div *ngIf="isLoading" class="no-products">
+        <i class="pi pi-spin pi-spinner" style="font-size: 3rem; color: #667eea;"></i>
+        <p>Loading products...</p>
       </div>
     </div>
   </div>
