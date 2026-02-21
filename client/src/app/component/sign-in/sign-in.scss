@@ -1,0 +1,142 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
+
+// Variables - צבעים עדינים ורכים
+$bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); // גרדיאנט אפור-תכלת רך
+$card-bg: #ffffff;
+$primary-soft: #6366f1; // אינדיגו עדין
+$text-main: #334155; // כחול-ציפחה כהה (פחות נוקשה משחור)
+$text-muted: #64748b;
+$input-bg: #f8fafc;
+$border-soft: #e2e8f0;
+$transition: all 0.3s ease;
+
+:host ::ng-deep {
+  font-family: 'Montserrat', sans-serif;
+
+  // ניקוי מוחלט של Padding חיצוני מה-HTML
+  .py-20, .px-6, .p-8, .md\:p-12 {
+    padding: 0 !important;
+  }
+
+  .p-card {
+    background: transparent;
+    box-shadow: none;
+    padding: 5px;
+    
+    .p-card-body { padding: 0; }
+  }
+}
+
+// המכולה הראשית - ללא גלילה
+.bg-surface-50 {
+  background: $bg-gradient;
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: fixed;
+  top: 0;
+  left: 0;
+}
+
+// הכרטיס - הוספת רווחים (Padding) ועיצוב עדין
+.bg-surface-0 {
+  background: $card-bg;
+  border-radius: 28px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.05);
+  width: 90%;
+  max-width: 440px;
+  
+  // הוספת רווח משמעותי מהצדדים (Padding)
+  padding: 4rem 3rem; 
+  
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem; // רווח בין האלמנטים בתוך הכרטיס
+  animation: fadeIn 0.7s ease-in-out;
+}
+
+// כותרות
+.text-2xl {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: $text-main;
+  text-align: center;
+  margin: 0;
+}
+
+.text-surface-700 {
+  color: $text-muted;
+  font-size: 0.95rem;
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
+// שדות הקלט - מראה רך
+.flex-col.gap-2 {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+label {
+  font-weight: 600;
+  color: $text-main;
+  font-size: 0.85rem;
+  padding-right: 0.2rem; // רווח קטן להתחלת הטקסט
+}
+
+input[pInputText] {
+  width: 100%;
+  padding: 0.9rem 1.2rem;
+  background-color: $input-bg;
+  border: 1px solid $border-soft;
+  border-radius: 14px;
+  transition: $transition;
+  font-size: 0.95rem;
+  color: $text-main;
+
+  &:focus {
+    background-color: #fff;
+    border-color: $primary-soft;
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+    outline: none;
+  }
+}
+
+// כפתור - צבע עדין יותר
+button[pButton] {
+  background-color: $primary-soft;
+  color: white;
+  border: none;
+  border-radius: 14px;
+  padding: 1rem;
+  font-weight: 600;
+  font-size: 1rem;
+  width: 100%;
+  cursor: pointer;
+  transition: $transition;
+  margin-top: 0.5rem;
+
+  &:hover {
+    background-color: darken($primary-soft, 5%);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.2);
+  }
+}
+
+// קישור
+.text-primary {
+  color: $primary-soft;
+  font-weight: 600;
+  text-decoration: none;
+  &:hover { text-decoration: underline; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
