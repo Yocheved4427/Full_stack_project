@@ -21,4 +21,12 @@ export class ApiService {
   getVacationById(id: number): Observable<any> {
       return this.http.get<any>(`${this.apiUrl}/Products/${id}`);
   }
+
+  login(email: string, password: string): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/User/login`, { email, password });
+  }
+
+  register(signupData: any): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/User/register`, signupData);
+  }
 }
