@@ -1,10 +1,10 @@
-// ביטול הריווח של PrimeNG כדי שהתמונה תיצמד לקצוות
+
 :host ::ng-deep .p-card-header {
     padding: 0 !important;
     margin: 0 !important;
 }
 
-// הגדרות התמונה
+
 .card-image {
     width: 100%;
     height: 180px; 
@@ -12,7 +12,7 @@
     display: block;
 }
 
-// Centered card title
+
 .card-title-center {
   text-align: center;
   font-size: 1.2rem;
@@ -24,7 +24,6 @@
   line-height: 1.3;
 }
 
-// Footer actions container
 .footer-actions {
     display: flex;
     justify-content: center;
@@ -35,7 +34,7 @@
     margin-top: -0.5rem;
 }
 
-// Price display styling
+
 .price-display {
     width: 150px;
     flex-shrink: 0;
@@ -53,7 +52,7 @@
     box-sizing: border-box;
 }
 
-// Button wrapper - exact same size as price
+
 .button-wrapper {
     width: 150px;
     flex-shrink: 0;
@@ -84,7 +83,7 @@
     }
 }
 
-// הבטחת גובה אחיד בתוך הכרטיס
+
 :host ::ng-deep .p-card {
     height: 100%;
     display: flex;

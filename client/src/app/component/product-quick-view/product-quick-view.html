@@ -1,7 +1,10 @@
-<p-dialog [(visible)]="visible" (onHide)="close()" [modal]="true" [header]="product?.productName" [style]="{width: '1400px', maxWidth: '98vw'}" [contentStyle]="{padding: '2rem'}">
+<p-dialog [(visible)]="visible" (onHide)="close()" [modal]="true" [header]="''" [style]="{width: '1400px', maxWidth: '98vw'}" [contentStyle]="{padding: '1.5rem', overflow: 'visible'}">
   <div class="quick-view-content" *ngIf="product">
     
     <div class="gallery" *ngIf="images.length > 0">
+      <!-- Product Name -->
+      <h2 class="product-title">{{product.productName}}</h2>
+      
       <!-- Main image display -->
       <div class="main-image-container">
         <button class="nav-button nav-left" (click)="previousImage()" *ngIf="images.length > 1">
@@ -37,20 +40,31 @@
     </div>
 
     <div class="details">
-      <div class="description">
-        <p>{{product.description}}</p>
+      <div class="description-card">
+        <div class="description-header">
+          <i class="pi pi-map-marker"></i>
+          <span>About This Destination</span>
+        </div>
+        <div class="description-content">
+          <p>{{product.description}}</p>
+        </div>
       </div>
       
       <div class="field-group">
         <div class="field">
           <label>Start Date:</label>
-          <p-datepicker [(ngModel)]="startDate" [minDate]="minDate" placeholder="Select start date" [style]="{width: '100%'}"></p-datepicker>
+          <p-datepicker [(ngModel)]="startDate" [minDate]="minDate" [disabledDates]="disabledDates" (ngModelChange)="onDateChange()" placeholder="Select start date" [style]="{width: '100%'}" appendTo="body"></p-datepicker>
         </div>
 
         <div class="field">
           <label>End Date:</label>
-          <p-datepicker [(ngModel)]="endDate" [minDate]="startDate || minDate" placeholder="Select end date" [style]="{width: '100%'}"></p-datepicker>
+          <p-datepicker [(ngModel)]="endDate" [minDate]="startDate || minDate" [disabledDates]="disabledDates" (ngModelChange)="onDateChange()" placeholder="Select end date" [style]="{width: '100%'}" appendTo="body"></p-datepicker>
         </div>
+      </div>
+
+      <div *ngIf="dateValidationError" class="date-validation-error">
+        <i class="pi pi-exclamation-triangle"></i>
+        <span>{{dateValidationError}}</span>
       </div>
 
       <div class="field participants-field">
@@ -62,6 +76,11 @@
         </p-inputNumber>
       </div>
 
+      <div *ngIf="peakPeriodMessage" class="peak-period-message">
+        <i class="pi pi-info-circle"></i>
+        <span>{{peakPeriodMessage}}</span>
+      </div>
+
       <div class="summary-card" *ngIf="totalNights > 0">
         <div class="summary-line"><span>Nights:</span> <strong>{{totalNights}}</strong></div>
         <div class="summary-line"><span>Participants:</span> <strong>{{participants}}</strong></div>
@@ -69,7 +88,9 @@
       </div>
 
       <button pButton label="Add to Cart" icon="pi pi-shopping-cart" class="add-to-cart-btn" 
-              [disabled]="!isFormValid()"></button>
+              [disabled]="!isFormValid()" (click)="addToCart()"></button>
+      
+      <div *ngIf="successMessage" class="success-message">{{ successMessage }}</div>
 
     </div>
   </div>

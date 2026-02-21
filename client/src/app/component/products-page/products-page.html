@@ -7,8 +7,9 @@
       </div>
     </div>
     <div class="header-icons">
-      <button class="icon-button" title="Shopping Cart">
+      <button class="icon-button cart-icon-wrapper" title="Shopping Cart" (click)="navigateToCart()">
         <i class="pi pi-shopping-cart"></i>
+        <span class="cart-badge" *ngIf="cartItemCount > 0">{{ cartItemCount }}</span>
       </button>
       <button class="icon-button" title="User Profile">
         <i class="pi pi-user"></i>
@@ -45,5 +46,6 @@
 <app-product-quick-view 
   *ngIf="selectedProduct && displayDialog"
   [(visible)]="displayDialog" 
-  [product]="selectedProduct">
+  [product]="selectedProduct"
+  (cartUpdated)="updateCartCount()">
 </app-product-quick-view>

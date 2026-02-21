@@ -35,7 +35,12 @@ namespace Services
                 (decimal)(p.Price ?? 0),
                 p.Images?.FirstOrDefault(i => i.IsMain)?.Url ?? "",
                 p.Images?.Select(i => i.Url).ToList() ?? new List<string>(),
-                new List<ProductMonthConfigDTO>()
+                p.ProductMonthConfigs?.Select(mc => new ProductMonthConfigDTO(
+                    mc.ConfigId,
+                    mc.MonthNumber ?? 0,
+                    mc.IsAvailable,
+                    mc.SpecialPrice ?? 0
+                )).ToList() ?? new List<ProductMonthConfigDTO>()
             )).ToList();
 
             // 3. יצירת התשובה
@@ -53,6 +58,30 @@ namespace Services
             pageResponse.HasNextPage = position < totalPages;
 
             return pageResponse;
+        }
+
+        public async Task<ProductDTO?> GetProductById(int productId)
+        {
+            var product = await _repository.GetProductById(productId);
+            
+            if (product == null)
+                return null;
+
+            return new ProductDTO(
+                product.ProductId,
+                product.ProductName ?? "",
+                product.Description ?? "",
+                product.CategoryId ?? 0,
+                (decimal)(product.Price ?? 0),
+                product.Images?.FirstOrDefault(i => i.IsMain)?.Url ?? "",
+                product.Images?.Select(i => i.Url).ToList() ?? new List<string>(),
+                product.ProductMonthConfigs?.Select(mc => new ProductMonthConfigDTO(
+                    mc.ConfigId,
+                    mc.MonthNumber ?? 0,
+                    mc.IsAvailable,
+                    mc.SpecialPrice ?? 0
+                )).ToList() ?? new List<ProductMonthConfigDTO>()
+            );
         }
     }
     }

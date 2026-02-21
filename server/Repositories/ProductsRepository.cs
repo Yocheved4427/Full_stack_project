@@ -38,6 +38,7 @@ namespace Repositories
                 .Take(skip)
                 .Include(product => product.Category)
                 .Include(product => product.Images)
+                .Include(product => product.ProductMonthConfigs)
                 .ToListAsync();
             
             var total = await query.CountAsync();
@@ -45,5 +46,14 @@ namespace Repositories
             return (products, total);
         }
 
+        public async Task<Product?> GetProductById(int productId)
+        {
+            return await _context.Products
+                .AsNoTracking()
+                .Include(product => product.Category)
+                .Include(product => product.Images)
+                .Include(product => product.ProductMonthConfigs)
+                .FirstOrDefaultAsync(p => p.ProductId == productId);
+        }
     }
 }

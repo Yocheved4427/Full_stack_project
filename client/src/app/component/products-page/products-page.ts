@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { ProductCard } from '../product-card/product-card.component';
 import { ProductService } from '../../services/product.service';
 import { Product } from '../../models/product.model';
@@ -8,6 +9,7 @@ import { Filters } from '../filters/filters';
 import { Subject } from 'rxjs';
 import { takeUntil, switchMap } from 'rxjs/operators';
 import { ProductQuickViewComponent } from '../product-quick-view/product-quick-view';
+import { CartService } from '../../services/cart.service';
 
 @Component({
   selector: 'app-products-page',
@@ -30,14 +32,21 @@ export class ProductsPageComponent implements OnInit, OnDestroy {
   hasNextPage: boolean = false;
   currentFilters: ProductFilter = { page: 0, pageSize: 12 };
   isLoading: boolean = false;
+  cartItemCount: number = 0;
   
   private destroy$ = new Subject<void>();
 
-  constructor(private productService: ProductService, private cdr: ChangeDetectorRef) {}
+  constructor(
+    private productService: ProductService,
+    private cdr: ChangeDetectorRef,
+    private router: Router,
+    private cartService: CartService
+  ) {}
 
   ngOnInit() {
     // Load all products once
     this.loadProducts();
+    this.updateCartCount();
   }
   
   loadProducts() {
@@ -108,6 +117,14 @@ export class ProductsPageComponent implements OnInit, OnDestroy {
     this.selectedProduct = product;
     this.productKey = product.productId;
     this.displayDialog = true;
+  }
+
+  navigateToCart() {
+    this.router.navigate(['/cart']);
+  }
+
+  updateCartCount() {
+    this.cartItemCount = this.cartService.getCart().length;
   }
 
   // Track by function for ngFor

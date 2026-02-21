@@ -34,7 +34,7 @@ export class Filters implements OnInit, OnDestroy {
 
   categories: Category[] = [];
   selectedCategories: any[] = [];
-  rangeValues: number[] = [0, 15000];
+  rangeValues: number[] = [0, 3000];
   searchTerm: string = '';
   
   private searchSubject = new Subject<string>();
@@ -76,7 +76,7 @@ updateFilters() {
       pageSize: 12,
       categoryIds: categoryIds,
       minPrice: this.rangeValues[0] > 0 ? this.rangeValues[0] : undefined,
-      maxPrice: this.rangeValues[1] < 15000 ? this.rangeValues[1] : undefined,
+      maxPrice: this.rangeValues[1] < 3000 ? this.rangeValues[1] : undefined,
       description: this.searchTerm.trim() || undefined
     };
 
@@ -86,7 +86,7 @@ updateFilters() {
 
   reset() {
     this.selectedCategories = [];
-    this.rangeValues = [0, 15000];
+    this.rangeValues = [0, 3000];
     this.searchTerm = '';
     this.updateFilters();
   }
