@@ -18,7 +18,7 @@ builder.Services.AddScoped<IRatingRepository, RatingRepository>();
 builder.Services.AddScoped<IRatingService, RatingService>();
 
 builder.Host.UseNLog();
-builder.Services.AddDbContext<ApiShopContext>(option=>option.UseSqlServer ("Data Source=Yocheved;Initial Catalog=ApiShop;Integrated Security=True;Pooling=False;TrustServerCertificate=True"));
+builder.Services.AddDbContext<ApiShopContext>(option=>option.UseSqlServer ("Data Source=Noa;Initial Catalog=ApiShop;Integrated Security=True;Trust Server Certificate=True"));
 // Add services to the container.
 
 builder.Services.AddControllers()

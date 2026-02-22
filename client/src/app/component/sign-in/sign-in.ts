@@ -6,7 +6,7 @@ import { CheckboxModule } from 'primeng/checkbox';
 import { InputTextModule } from 'primeng/inputtext';
 import { CardModule } from 'primeng/card';
 import { ApiService } from '../../services/api.service';
-import { Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-sign-in',
@@ -16,15 +16,19 @@ import { Router, RouterModule } from '@angular/router';
   styleUrls: ['./sign-in.scss'],
 })
 export class SignIn {
+  returnUrl: string = '/';
   checked1 = signal<boolean>(true);
   email = signal<string>('');
   password = signal<string>('');
   isLoading = signal<boolean>(false);
   errorMessage = signal<string>('');
 
-  constructor(private apiService: ApiService, private router: Router) {}
-
+  constructor(private apiService: ApiService, private router: Router, private route: ActivatedRoute) {}
+  ngOnInit() {
+    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
+  }
   login(): void {
+    
     this.errorMessage.set('');
     
     if (!this.email() || !this.password()) {
@@ -41,7 +45,7 @@ export class SignIn {
           localStorage.setItem('auth_token', response.token);
         }
         // Navigate to home or dashboard
-        this.router.navigate(['/home']);
+        this.router.navigate([this.returnUrl]);
       },
       error: (error: any) => {
         console.error('Login failed:', error);

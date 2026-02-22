@@ -34,8 +34,8 @@ namespace TestProject
        
             var usersList = new List<User>
         {
-            new User { Id = 1, FirstName = "A", Email = "a@test.com" },
-            new User { Id = 2, FirstName = "B", Email = "b@test.com" }
+            new User { UserId = 1, FirstName = "A", Email = "a@test.com" },
+            new User { UserId = 2, FirstName = "B", Email = "b@test.com" }
         };
          
             mockContext.Setup(x => x.Users).ReturnsDbSet(usersList);
@@ -53,7 +53,7 @@ namespace TestProject
             var repository = new UserRepository(mockContext.Object);
             var userToUpdate = new User
             {
-                Id = 1,
+                UserId = 1,
                 Email = "update@test.com",
                 FirstName = "OldName",
                 LastName = "User",
@@ -73,7 +73,7 @@ namespace TestProject
     {
         new User
         {
-            Id = 1,
+            UserId = 1,
             Email = "login@test.com",
             Password = "Password123",
             FirstName = "Login",
@@ -83,7 +83,7 @@ namespace TestProject
                 {
                     OrderId = 100,
                     OrderDate = DateOnly.FromDateTime(DateTime.Now),
-                    OrderSum = 250.5
+                    OrderSum = 250.5M
                 }
             }
         }
@@ -97,7 +97,7 @@ namespace TestProject
             Assert.Equal("login@test.com", result.Email);
           
             Assert.NotEmpty(result.Orders);
-            Assert.Equal(250.5, result.Orders.First().OrderSum);
+            Assert.Equal(250.5M, result.Orders.First().OrderSum);
         }
         [Fact]
         public async Task GetUserById_ShouldReturnUser_WhenIdExists()
@@ -107,7 +107,7 @@ namespace TestProject
 
             var user = new User
             {
-                Id = 1,
+                UserId = 1,
                 Email = "find@test.com",
                 FirstName = "Find",
                 LastName = "Me",
@@ -125,7 +125,7 @@ namespace TestProject
             var repository = new UserRepository(mockContext.Object);
             var result = await repository.GetUserById(1);
             Assert.NotNull(result);
-            Assert.Equal(1, result.Id);
+            Assert.Equal(1, result.UserId);
         }
         [Fact]
         public async Task GetUsers_ShouldReturnEmptyList_WhenNoUsersExist()

@@ -11,7 +11,7 @@
         <i class="pi pi-shopping-cart"></i>
         <span class="cart-badge" *ngIf="cartItemCount > 0">{{ cartItemCount }}</span>
       </button>
-      <button class="icon-button" title="User Profile">
+      <button class="icon-button" title="User Profile" (click)="goToRegister()">
         <i class="pi pi-user"></i>
       </button>
     </div>

@@ -10,11 +10,13 @@ import { Subject } from 'rxjs';
 import { takeUntil, switchMap } from 'rxjs/operators';
 import { ProductQuickViewComponent } from '../product-quick-view/product-quick-view';
 import { CartService } from '../../services/cart.service';
+import { UserService } from '../../services/user.service';
+import { SignIn } from '../sign-in/sign-in';
 
 @Component({
   selector: 'app-products-page',
   standalone: true,
-  imports: [CommonModule, ProductCard, Filters, ProductQuickViewComponent], // ודאי שכל אלו כאן
+  imports: [CommonModule, ProductCard, Filters, ProductQuickViewComponent, SignIn], // ודאי שכל אלו כאן
   templateUrl: './products-page.html',
   styleUrl: './products-page.scss'
 })
@@ -40,7 +42,8 @@ export class ProductsPageComponent implements OnInit, OnDestroy {
     private productService: ProductService,
     private cdr: ChangeDetectorRef,
     private router: Router,
-    private cartService: CartService
+    private cartService: CartService,
+    private userService: UserService
   ) {}
 
   ngOnInit() {
@@ -130,5 +133,14 @@ export class ProductsPageComponent implements OnInit, OnDestroy {
   // Track by function for ngFor
   trackByProductId(index: number, product: Product): number {
     return product.productId;
+  }
+  goToRegister() {
+    // שומרים את הכתובת הנוכחית ומעבירים אותה כפרמטר לעמוד ה-login
+     
+    // שלב א': מנתקים את המשתמש הקיים (מוחקים את הזיכרון)
+    this.userService.logoutUser();
+    
+    // שלב ב': מעבירים אותו לדף ההרשמה כשהוא כבר נקי ו"אורח"
+    this.router.navigate(['/sign-in'], { queryParams: { returnUrl: this.router.url } });
   }
 }

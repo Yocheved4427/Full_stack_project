@@ -32,7 +32,7 @@ namespace Services
         {
             int passScore = _passwordServices.PasswordScore(user.Password);
             if (passScore < 2)
-                return null;
+                throw new Exception("Password must be at least 8 characters and include a number and uppercase letter") ;
             
             User userEntity = _mapper.Map<User>(user);
 

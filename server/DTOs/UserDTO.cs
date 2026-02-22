@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace DTOs
 {
+    
     public record UserDTO
     (
         int Id,
@@ -20,6 +21,12 @@ namespace DTOs
         
         bool IsAdmin
 
+        
+    )
+    {
+    public UserDTO() : this(0, string.Empty, string.Empty, string.Empty, string.Empty, false)
+    {
+    }
 
-    );
 }
+};

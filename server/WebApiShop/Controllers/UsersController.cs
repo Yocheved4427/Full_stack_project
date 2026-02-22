@@ -50,13 +50,19 @@ namespace WebApiShop.Controllers
         [HttpPost]
         public async Task<ActionResult<UserDTO>> Register([FromBody] UserDTO user)
         {
-            UserDTO user1 = await _userServices.Register(user);
+            try
+            {
+                UserDTO user1 = await _userServices.Register(user);
             if (user1 == null)
                 return BadRequest("Password");
+            
+                return CreatedAtAction(nameof(GetUserById), new { user.Id }, user);
 
-            return CreatedAtAction(nameof(GetUserById), new { user.Id }, user);
-
-
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         // PUT api/<Users>/5
