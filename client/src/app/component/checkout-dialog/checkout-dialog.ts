@@ -25,6 +25,7 @@ export class CheckoutDialog implements OnInit {
   googlePayClient: any = null;
   isGooglePayReady: boolean = false;
   isProcessing: boolean = false;
+  checkoutError: string = '';
 
   private userService = inject(UserService);
   private apiService = inject(ApiService);
@@ -36,7 +37,7 @@ export class CheckoutDialog implements OnInit {
   ngOnInit() {
     this.cartItems = this.config.data?.cartItems || [];
     this.totalPrice = this.config.data?.totalPrice || 0;
-    this.isLoggedIn = this.userService.isLoggedIn();
+    this.isLoggedIn = !!this.userService.getCurrentUser();
 
     if (this.isLoggedIn) {
       this.initializeGooglePay();
@@ -191,9 +192,14 @@ export class CheckoutDialog implements OnInit {
 
   processPayment(paymentData: any) {
     this.isProcessing = true;
+    this.checkoutError = '';
     
     const currentUser = this.userService.getCurrentUser();
-    if (!currentUser) {
+    const resolvedUserId = currentUser?.id || currentUser?.Id || currentUser?.userId;
+
+    if (!currentUser || !resolvedUserId) {
+      this.checkoutError = 'You must be signed in to complete checkout.';
+      this.isLoggedIn = false;
       this.isProcessing = false;
       return;
     }
@@ -205,10 +211,10 @@ export class CheckoutDialog implements OnInit {
 
     // Create order data
     const orderData = {
-      userId: currentUser.id || currentUser.Id || currentUser.userId,
+      userId: resolvedUserId,
       orderDate: new Date().toISOString().split('T')[0], // YYYY-MM-DD format
       orderSum: this.totalPrice,
-      status: 'Confirmed',
+      status: 'Waiting',
       orderItems: this.cartItems.map(item => ({
         productId: item.id,
         productName: item.name,
@@ -269,31 +275,7 @@ export class CheckoutDialog implements OnInit {
         console.error('Error message:', err.message);
         console.error('Error details:', err.error);
         this.isProcessing = false;
-        // Still navigate to thank you page with simulated order in demo mode
-        const simulatedOrderNumber = this.generateOrderNumber();
-        
-        // Send email anyway for demo
-        const emailData = {
-          to: currentUser.email,
-          subject: 'Thank You for Your Purchase - Order Confirmation',
-          orderNumber: simulatedOrderNumber,
-          customerName: `${currentUser.firstName} ${currentUser.lastName}`,
-          orderDate: new Date(),
-          orderTotal: this.totalPrice,
-          orderItems: this.cartItems
-        };
-        
-        this.apiService.sendOrderConfirmationEmail(emailData).subscribe();
-        
-        this.ref.close({ success: true });
-        this.router.navigate(['/thank-you'], {
-          state: {
-            orderNumber: simulatedOrderNumber,
-            orderTotal: this.totalPrice,
-            customerEmail: currentUser.email,
-            orderItems: this.cartItems
-          }
-        });
+        this.checkoutError = err?.error?.message || err?.error?.error || 'Order was not saved. Please try again.';
       }
     });
   }

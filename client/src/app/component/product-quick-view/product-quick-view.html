@@ -100,8 +100,6 @@
             <div class="quick-view-actions">
         <button pButton label="Add to Cart" icon="pi pi-shopping-cart" class="add-to-cart-btn" 
           [disabled]="!isFormValid()" (click)="addToCart()"></button>
-
-        <button pButton label="To the cart" icon="pi pi-arrow-right" class="go-to-cart-btn" routerLink="/cart"></button>
             </div>
       
       <div *ngIf="successMessage" class="success-message">{{ successMessage }}</div>
