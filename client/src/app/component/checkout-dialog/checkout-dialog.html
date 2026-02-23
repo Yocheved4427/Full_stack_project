@@ -1,0 +1,83 @@
+<div class="checkout-dialog">
+  <div class="dialog-header">
+    <h2><i class="pi pi-shopping-cart"></i> Checkout</h2>
+  </div>
+
+  <div class="dialog-content">
+    <!-- Not Logged In Message -->
+    <div *ngIf="!isLoggedIn" class="not-logged-in">
+      <i class="pi pi-exclamation-triangle warning-icon"></i>
+      <h3>Login Required</h3>
+      <p>You need to be logged in to complete your purchase.</p>
+      <p-button 
+        label="Go to Login" 
+        icon="pi pi-sign-in" 
+        severity="success" 
+        (onClick)="goToLogin()"
+        styleClass="mt-3" />
+    </div>
+
+    <!-- Logged In - Show Order Summary and Google Pay -->
+    <div *ngIf="isLoggedIn" class="logged-in">
+      <div class="order-summary">
+        <h3>Order Summary</h3>
+        <p-divider></p-divider>
+        
+        <div class="summary-items">
+          <div class="summary-item" *ngFor="let item of cartItems">
+            <div class="item-info">
+              <span class="item-name">{{ item.name }}</span>
+              <span class="item-details">
+                {{ item.startDate | date:'shortDate' }} - {{ item.endDate | date:'shortDate' }} 
+                ({{ item.quantity }} participants)
+              </span>
+            </div>
+            <span class="item-price">{{ item.price | currency:'USD':'symbol':'1.0-0' }}</span>
+          </div>
+        </div>
+
+        <p-divider></p-divider>
+
+        <div class="total-row">
+          <span class="total-label">Total Amount:</span>
+          <span class="total-amount">{{ totalPrice | currency:'USD':'symbol':'1.0-0' }}</span>
+        </div>
+      </div>
+
+      <div class="payment-section">
+        <h3>Payment Method</h3>
+        <p-divider></p-divider>
+        
+        <div *ngIf="!isProcessing">
+          <div id="google-pay-button-container" class="google-pay-container"></div>
+          
+          <div *ngIf="!isGooglePayReady" class="loading-gpay">
+            <p-progressSpinner 
+              styleClass="w-4rem h-4rem" 
+              strokeWidth="4" 
+              animationDuration="1s" />
+            <p>Loading Google Pay...</p>
+          </div>
+        </div>
+
+        <div *ngIf="isProcessing" class="processing">
+          <p-progressSpinner 
+            styleClass="w-4rem h-4rem" 
+            strokeWidth="4" 
+            animationDuration="1s" />
+          <p>Processing payment...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dialog-footer">
+    <p-button 
+      label="Cancel" 
+      icon="pi pi-times" 
+      severity="secondary" 
+      [outlined]="true"
+      (onClick)="close()" 
+      [disabled]="isProcessing" />
+  </div>
+</div>

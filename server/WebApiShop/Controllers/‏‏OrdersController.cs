@@ -30,16 +30,54 @@ namespace WebApiShop.Controllers
         [HttpPost]
        public async Task<ActionResult<OrderDTO>> Post([FromBody] OrderDTO newOrder)
         {
-            newOrder = await _ordersServices.AddOrder(newOrder);
-            if (newOrder == null)
-                return BadRequest();
-            return CreatedAtAction(nameof(Get), new { id = newOrder.OrderId }, newOrder);
+            Console.WriteLine($"=== ORDER CREATION REQUEST ===");
+            Console.WriteLine($"Raw request received");
+            
+            try
+            {
+                Console.WriteLine($"User ID: {newOrder.UserId}");
+                Console.WriteLine($"Order Date: {newOrder.OrderDate}");
+                Console.WriteLine($"Order Sum: {newOrder.OrderSum}");
+                Console.WriteLine($"Status: {newOrder.Status}");
+                Console.WriteLine($"Order Items: {newOrder.OrderItems?.Count ?? 0}");
+                
+                if (newOrder.OrderItems != null)
+                {
+                    foreach (var item in newOrder.OrderItems)
+                    {
+                        Console.WriteLine($"  - Product {item.ProductId}: {item.ProductName}, Qty: {item.Quantity}");
+                    }
+                }
+                
+                newOrder = await _ordersServices.AddOrder(newOrder);
+                
+                if (newOrder == null)
+                {
+                    Console.WriteLine("ERROR: Order creation returned null");
+                    return BadRequest("Failed to create order");
+                }
+                
+                Console.WriteLine($"✅ Order created successfully with ID: {newOrder.OrderId}");
+                return CreatedAtAction(nameof(Get), new { id = newOrder.OrderId }, newOrder);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ ERROR creating order: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine($"Inner exception: {ex.InnerException.Message}");
+                }
+                return StatusCode(500, new { error = ex.Message, innerError = ex.InnerException?.Message, stackTrace = ex.StackTrace });
+            }
         }
 
-
-
-
-
+        [HttpGet("user/{userId}")]
+        public async Task<ActionResult<List<OrderDTO>>> GetUserOrders(int userId)
+        {
+            var orders = await _ordersServices.GetOrdersByUserId(userId);
+            return Ok(orders);
+        }
 
     }
 }

@@ -1,4 +1,5 @@
 <div class="cart-container">
+  <p-toast></p-toast>
   <div class="cart-header">
     <h1><i class="pi pi-shopping-cart"></i> Shopping Cart</h1>
     <p-button label="Continue Shopping" icon="pi pi-arrow-left" [outlined]="true" routerLink="/products" />
@@ -67,7 +68,7 @@
         </div>
         <div class="action-buttons">
             <p-button label="Clear Cart" severity="danger" [outlined]="true" (onClick)="clearCart()" />
-            <p-button label="Checkout" icon="pi pi-check" severity="success" />
+            <p-button label="Checkout" icon="pi pi-check" severity="success" (onClick)="checkout()" />
         </div>
     </div>
   </div>

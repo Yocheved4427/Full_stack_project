@@ -19,6 +19,7 @@ builder.Services.AddScoped<IOrdersRepository, OrdersRepository> ();
 builder.Services.AddScoped<IOrdersServices, OrdersServices>();
 builder.Services.AddScoped<IRatingRepository, RatingRepository>();
 builder.Services.AddScoped<IRatingService, RatingService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 builder.Host.UseNLog();
 builder.Services.AddDbContext<ApiShopContext>(option=>option.UseSqlServer ("Data Source=Yocheved;Initial Catalog=ApiShop;Integrated Security=True;Trust Server Certificate=True"));
@@ -57,7 +58,7 @@ builder.Services.AddCors(options =>
 
 var key = Encoding.ASCII.GetBytes(builder.Configuration["Jwt:Key"]);
 
-// двгшъ орвреп дайоеъ
+// пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 builder.Services.AddAuthentication(x =>
 {
     x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -69,7 +70,7 @@ builder.Services.AddAuthentication(x =>
     x.SaveToken = true;
     x.TokenValidationParameters = new TokenValidationParameters
     {
-        ValidateIssuerSigningKey = true, // зебд маоъ аъ дзъйод
+        ValidateIssuerSigningKey = true, // пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
         IssuerSigningKey = new SymmetricSecurityKey(key),
         ValidateIssuer = false,
         ValidateAudience = false

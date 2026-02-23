@@ -34,6 +34,25 @@ export class ApiService {
     return this.http.get<any[]>(`${this.apiUrl}/Orders/user/${userId}`);
   }
 
+  createOrder(orderData: any): Observable<any> {
+    console.log('API Service: Creating order', orderData);
+    return this.http.post<any>(`${this.apiUrl}/Orders`, orderData);
+  }
+
+  sendOrderConfirmationEmail(emailData: any): Observable<any> {
+    console.log('API Service: Sending email', emailData);
+    // Call the real backend email endpoint
+    return this.http.post<any>(`${this.apiUrl}/Email/send-order-confirmation`, {
+      to: emailData.to,
+      customerName: emailData.customerName,
+      orderNumber: emailData.orderNumber,
+      orderTotal: emailData.orderTotal,
+      orderItems: emailData.orderItems.map((item: any) => 
+        `${item.name} (${item.quantity} participants) - $${item.price}`
+      ).join(', ')
+    });
+  }
+
   updateUser(userData: any): Observable<any> {
     return this.http.put<any>(`${this.apiUrl}/Users/${userData.id}`, userData);
   }

@@ -10,6 +10,7 @@ import { AdminProductList } from './component/admin-product-list/admin-product-l
 import { AdminCategory } from './component/admin-category/admin-category';
 import { AdminOrders } from './component/admin-orders/admin-orders';
 import { adminGuard } from './guards/admin.guard';
+import { ThankYou } from './component/thank-you/thank-you';
 
 export const routes: Routes = [
   { path: '', component: Home },
@@ -18,6 +19,7 @@ export const routes: Routes = [
   { path: 'sign-in', component: SignIn },
   { path: 'sign-up', component: SignUp },
   { path: 'user-profile', component: UserProfile },
+  { path: 'thank-you', component: ThankYou },
   {
     path: 'admin',
     component: AdminLayout,

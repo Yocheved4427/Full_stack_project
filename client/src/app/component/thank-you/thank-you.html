@@ -1,0 +1,81 @@
+<div class="thank-you-container">
+  <div class="thank-you-card">
+    <div class="success-icon">
+      <i class="pi pi-check-circle"></i>
+    </div>
+
+    <h1 class="thank-you-title">Thank You for Your Purchase!</h1>
+    <p class="thank-you-subtitle">Your order has been successfully placed</p>
+
+    <div class="order-details-card">
+      <div class="order-info-grid">
+        <div class="info-item">
+          <span class="info-label">Order Number:</span>
+          <span class="info-value">{{ orderNumber }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Order Date:</span>
+          <span class="info-value">{{ orderDate | date:'medium' }}</span>
+        </div>
+        <div class="info-item" *ngIf="customerEmail">
+          <span class="info-label">Confirmation Email:</span>
+          <span class="info-value">{{ customerEmail }}</span>
+        </div>
+      </div>
+
+      <p-divider></p-divider>
+
+      <div class="order-summary" *ngIf="orderItems.length > 0">
+        <h3>Order Summary</h3>
+        <div class="order-items">
+          <div class="order-item" *ngFor="let item of orderItems">
+            <div class="item-details">
+              <span class="item-name">{{ item.name }}</span>
+              <span class="item-info">
+                {{ item.startDate | date:'shortDate' }} - {{ item.endDate | date:'shortDate' }}
+                <span class="separator">•</span>
+                {{ item.quantity }} participant(s)
+              </span>
+            </div>
+            <span class="item-price">{{ item.price | currency:'USD':'symbol':'1.0-0' }}</span>
+          </div>
+        </div>
+        
+        <p-divider></p-divider>
+        
+        <div class="total-row">
+          <span class="total-label">Total Amount:</span>
+          <span class="total-amount">{{ orderTotal | currency:'USD':'symbol':'1.0-0' }}</span>
+        </div>
+      </div>
+
+      <div class="email-notification" *ngIf="customerEmail">
+        <i class="pi pi-envelope"></i>
+        <p>A confirmation email with your order details has been sent to <strong>{{ customerEmail }}</strong></p>
+      </div>
+    </div>
+
+    <div class="action-buttons">
+      <p-button 
+        label="Continue Shopping" 
+        icon="pi pi-shopping-bag"
+        severity="success"
+        size="large"
+        (onClick)="continueShopping()" />
+      <p-button 
+        label="View My Orders" 
+        icon="pi pi-list"
+        [outlined]="true"
+        size="large"
+        (onClick)="viewOrders()" />
+    </div>
+
+    <div class="additional-info">
+      <p>
+        <i class="pi pi-info-circle"></i>
+        Need help? Contact our support team at 
+        <a href="mailto:support@vacationshop.com">support@vacationshop.com</a>
+      </p>
+    </div>
+  </div>
+</div>

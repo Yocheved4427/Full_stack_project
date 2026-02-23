@@ -1,5 +1,5 @@
 
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { DataViewModule } from 'primeng/dataview';
@@ -9,28 +9,74 @@ import { ApiService } from '../../services/api.service';
 import { CommonModule } from '@angular/common';
 import { CartItem } from '../../models/cart.model';
 import { FormsModule } from '@angular/forms';
+import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
+import { MessageService } from 'primeng/api';
+import { ToastModule } from 'primeng/toast';
+import { CheckoutDialog } from '../checkout-dialog/checkout-dialog';
 
 
 @Component({
   selector: 'app-cart',
   standalone: true, 
-  imports: [ButtonModule, DataViewModule, TagModule, CommonModule, RouterLink, FormsModule],
+  imports: [ButtonModule, DataViewModule, TagModule, CommonModule, RouterLink, FormsModule, ToastModule],
   templateUrl: './cart.html',
   styleUrl: './cart.scss',
-
+  providers: [DialogService, MessageService]
 })
-export class Cart implements OnInit {
+export class Cart implements OnInit, OnDestroy {
 
   cartItems: CartItem[] = [];  
   editingItemId: string | null = null;
   editStartDate = signal<string>('');
   editEndDate = signal<string>('');
   editParticipants = signal<number>(1);
+  dialogRef: DynamicDialogRef | undefined;
 
-  constructor(private cartService: CartService, private apiService: ApiService) {}
+  constructor(
+    private cartService: CartService, 
+    private apiService: ApiService,
+    private dialogService: DialogService,
+    private messageService: MessageService
+  ) {}
 
   ngOnInit() {
     this.cartItems = this.cartService.getCart();
+  }
+
+  ngOnDestroy() {
+    if (this.dialogRef) {
+      this.dialogRef.close();
+    }
+  }
+
+  checkout() {
+    if (this.cartItems.length === 0) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Empty Cart',
+        detail: 'Your cart is empty. Please add items before checkout.'
+      });
+      return;
+    }
+
+    const ref = this.dialogService.open(CheckoutDialog, {
+      header: 'Complete Your Purchase',
+      width: '700px',
+      data: {
+        cartItems: this.cartItems,
+        totalPrice: this.totalPrice
+      }
+    });
+
+    if (ref) {
+      this.dialogRef = ref;
+      ref.onClose.subscribe((result: any) => {
+        if (result?.success) {
+          // Clear cart - user will be redirected to thank you page
+          this.clearCart();
+        }
+      });
+    }
   }
 
   removeItem(cartItemId: string) {
