@@ -8,6 +8,7 @@ import { UserProfile } from './component/user-profile/user-profile';
 import { AdminLayout } from './component/admin-layout/admin-layout';
 import { AdminProductList } from './component/admin-product-list/admin-product-list';
 import { AdminCategory } from './component/admin-category/admin-category';
+import { AdminOrders } from './component/admin-orders/admin-orders';
 import { adminGuard } from './guards/admin.guard';
 
 export const routes: Routes = [
@@ -25,7 +26,7 @@ export const routes: Routes = [
       { path: '', redirectTo: 'products', pathMatch: 'full' },
       { path: 'products', component: AdminProductList },
       { path: 'categories', component: AdminCategory },
-      // Add more admin routes here (orders, etc.)
+      { path: 'orders', component: AdminOrders }
     ]
   },
   { path: '**', redirectTo: '' }

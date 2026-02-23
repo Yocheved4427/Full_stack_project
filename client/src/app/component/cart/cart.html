@@ -9,25 +9,42 @@
         <ng-template #list let-items>
             <div class="grid grid-cols-12 gap-4 grid-nogutter">
                 <div class="col-span-12" *ngFor="let item of items; let first = first">
-                    <div class="flex flex-col sm:flex-row sm:items-center p-6 gap-4" [ngClass]="{ 'border-t border-surface-200 dark:border-surface-700': !first }">
-                        <div class="md:w-40 relative">
-                            <img class="block xl:block mx-auto rounded-border w-full" [src]="item.image" [alt]="item.name" />
+                    <div class="cart-item" [ngClass]="{ 'border-t border-surface-200 dark:border-surface-700': !first }">
+                        <div class="item-media">
+                            <img class="rounded-border" [src]="item.image" [alt]="item.name" />
                         </div>
-                        <div class="flex flex-col md:flex-row justify-between md:items-center flex-1 gap-6">
-                            <div class="flex flex-row md:flex-col justify-between items-start gap-2">
-                                <div>
-                                    <div class="text-lg font-medium text-surface-900 dark:text-surface-0 mt-2">{{ item.name }}</div>
-                                    <div class="text-sm text-surface-600 dark:text-surface-400 mt-1">
-                                        <div><strong>Start Date:</strong> {{ item.startDate | date:'mediumDate' }}</div>
-                                        <div><strong>End Date:</strong> {{ item.endDate | date:'mediumDate' }}</div>
-                                        <div><strong>Participants:</strong> {{ item.quantity }}</div>
+                        <div class="item-content">
+                            <div class="item-details">
+                                <div class="text-lg font-medium text-surface-900 dark:text-surface-0">{{ item.name }}</div>
+                                <div class="text-sm text-surface-600 dark:text-surface-400 mt-1" *ngIf="editingItemId !== item.cartItemId">
+                                    <div><strong>Start Date:</strong> {{ item.startDate | date:'mediumDate' }}</div>
+                                    <div><strong>End Date:</strong> {{ item.endDate | date:'mediumDate' }}</div>
+                                    <div><strong>Participants:</strong> {{ item.quantity }}</div>
+                                </div>
+
+                                <div class="edit-form" *ngIf="editingItemId === item.cartItemId">
+                                    <div class="form-row">
+                                        <label>Start Date</label>
+                                        <input type="date" class="p-inputtext p-component" [ngModel]="editStartDate()" (ngModelChange)="editStartDate.set($event)" />
+                                    </div>
+                                    <div class="form-row">
+                                        <label>End Date</label>
+                                        <input type="date" class="p-inputtext p-component" [ngModel]="editEndDate()" (ngModelChange)="editEndDate.set($event)" />
+                                    </div>
+                                    <div class="form-row">
+                                        <label>Participants</label>
+                                        <input type="number" min="1" class="p-inputtext p-component" [ngModel]="editParticipants()" (ngModelChange)="editParticipants.set($event)" />
                                     </div>
                                 </div>
                             </div>
-                            <div class="flex flex-col md:items-end gap-8">
-                                <span class="text-xl font-semibold text-surface-900 dark:text-surface-0">${{ item.price }}</span>
-                                <div class="flex flex-row-reverse md:flex-row gap-2">
-                                    <p-button icon="pi pi-trash" severity="danger" [outlined]="true" (onClick)="removeItem(item.id)" label="Remove" />
+
+                            <div class="item-actions">
+                                <span class="text-xl font-semibold text-surface-900 dark:text-surface-0">{{ item.price | currency:'USD':'symbol':'1.0-0' }}</span>
+                                <div class="action-row">
+                                    <p-button *ngIf="editingItemId !== item.cartItemId" icon="pi pi-pencil" [outlined]="true" (onClick)="startEdit(item)" label="Edit" />
+                                    <p-button *ngIf="editingItemId === item.cartItemId" icon="pi pi-check" severity="success" (onClick)="saveEdit(item)" label="Save" />
+                                    <p-button *ngIf="editingItemId === item.cartItemId" icon="pi pi-times" severity="secondary" [outlined]="true" (onClick)="cancelEdit()" label="Cancel" />
+                                    <p-button icon="pi pi-trash" severity="danger" [outlined]="true" (onClick)="removeItem(item.cartItemId)" label="Remove" />
                                 </div>
                             </div>
                         </div>
@@ -46,7 +63,7 @@
     <div *ngIf="cartItems.length > 0" class="cart-footer">
         <div class="total-section">
             <span class="total-label">Total:</span>
-            <span class="total-amount">\${{ totalPrice.toFixed(2) }}</span>
+            <span class="total-amount">{{ totalPrice | currency:'USD':'symbol':'1.0-0' }}</span>
         </div>
         <div class="action-buttons">
             <p-button label="Clear Cart" severity="danger" [outlined]="true" (onClick)="clearCart()" />

@@ -8,6 +8,7 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { GalleriaModule } from 'primeng/galleria';
 import { Tooltip } from 'primeng/tooltip';
 import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 import { ApiService } from '../../services/api.service';
 import { ProductMonthConfig } from '../../models/product.model';
 import { CartService } from '../../services/cart.service';
@@ -186,21 +187,14 @@ export class ProductQuickViewComponent implements OnChanges {
 
   get totalPrice(): number {
     if (!this.startDate || !this.endDate) return 0;
-    
     const basePrice = this.product?.price || 0;
-    let effectivePrice = basePrice;
-    
-    // Check if start date falls in a peak period month
-    const startMonth = this.startDate.getMonth() + 1;
-    const config = this.monthConfigs.find(mc => 
-      mc.monthNumber === startMonth && mc.isAvailable !== false && mc.specialPrice > 0
+    return this.cartService.calculateTotalAmount(
+      this.startDate,
+      this.endDate,
+      basePrice,
+      this.participants,
+      this.monthConfigs
     );
-    
-    if (config) {
-      effectivePrice = config.specialPrice;
-    }
-    
-    return this.totalNights * effectivePrice * this.participants;
   }
 
   onDateChange() {
@@ -244,10 +238,15 @@ export class ProductQuickViewComponent implements OnChanges {
       return;
     }
 
+    const basePrice = this.product?.price || 0;
+
     const cartItem: CartItem = {
+      cartItemId: `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
       id: this.product.productId,
       name: this.product.productName,
       price: this.totalPrice,
+      basePrice,
+      monthConfigs: this.monthConfigs,
       image: this.product.mainImageUrl || '',
       startDate: this.startDate!,
       endDate: this.endDate!,
