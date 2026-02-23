@@ -60,6 +60,8 @@ namespace Repositories
         {
             return await _context.Orders
                 .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.Product)
+                        .ThenInclude(p => p.Images)
                 .Where(o => o.UserId == userId)
                 .OrderByDescending(o => o.OrderDate)
                 .ToListAsync();

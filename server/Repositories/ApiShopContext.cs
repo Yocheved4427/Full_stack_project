@@ -67,7 +67,7 @@ public partial class ApiShopContext : DbContext
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnName("Order_Date");
             entity.Property(e => e.OrderSum)
-                .HasColumnType("decimal(10, 2)")
+               // .HasColumnType("decimal(10, 2)")
                 .HasColumnName("Order_Sum");
             entity.Property(e => e.Status).HasMaxLength(50);
             entity.Property(e => e.UserId).HasColumnName("User_Id");
