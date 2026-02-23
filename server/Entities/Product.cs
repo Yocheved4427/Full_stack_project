@@ -17,6 +17,8 @@ public partial class Product
 
     public decimal? Price { get; set; }
 
+    public bool IsActive { get; set; }
+
     public virtual Category Category { get; set; }
 
     public virtual ICollection<Image> Images { get; set; } = new List<Image>();

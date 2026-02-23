@@ -11,6 +11,7 @@ export interface Product {
     description: string;
     categoryId: number;
     price: number;
+    isActive?: boolean;
     mainImageUrl: string; 
     imageUrls?: string[];
     monthConfigs?: ProductMonthConfig[];

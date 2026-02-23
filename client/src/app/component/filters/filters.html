@@ -33,5 +33,17 @@
         <!-- Reset Button -->
         <p-button label="Reset Filters" icon="pi pi-refresh" (onClick)="reset()" 
                   [style]="{'width':'100%'}" severity="secondary"></p-button>
+
+        <!-- Pagination -->
+        <div *ngIf="totalItems > pageSize" class="pagination-section">
+            <p-paginator 
+              [rows]="pageSize" 
+              [totalRecords]="totalItems"
+              [first]="currentPage * pageSize"
+              (onPageChange)="onPageChange($event)"
+              [showPageLinks]="true"
+              [showCurrentPageReport]="false">
+            </p-paginator>
+        </div>
     </div>
 </div>

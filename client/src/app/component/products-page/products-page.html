@@ -19,12 +19,18 @@
 
   <!-- Main Content -->
   <div class="page-layout">
-    <app-filters (filtersChanged)="onFiltersChanged($event)"></app-filters>
+    <app-filters 
+      [totalItems]="totalItems" 
+      [pageSize]="pageSize" 
+      [currentPage]="currentPage"
+      (filtersChanged)="onFiltersChanged($event)"
+      (pageChanged)="onPageChange($event)">
+    </app-filters>
 
     <div class="products-section">
       <div class="products-grid">
         <app-product-card 
-            *ngFor="let p of displayProducts; trackBy: trackByProductId" 
+            *ngFor="let p of paginatedProducts; trackBy: trackByProductId" 
             [product]="p" 
             (addToCartClick)="openQuickView(p)">
         </app-product-card>

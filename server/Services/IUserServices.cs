@@ -9,5 +9,6 @@ namespace Services
         Task<UserDTO?> Register(UserDTO user);
         Task<bool> Update(int id, UserDTO updateUser);
         Task<IEnumerable<UserDTO>> GetUsers();
+
     }
 }

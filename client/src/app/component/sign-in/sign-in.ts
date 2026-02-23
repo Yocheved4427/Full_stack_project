@@ -6,6 +6,7 @@ import { CheckboxModule } from 'primeng/checkbox';
 import { InputTextModule } from 'primeng/inputtext';
 import { CardModule } from 'primeng/card';
 import { ApiService } from '../../services/api.service';
+import { UserService } from '../../services/user.service';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 
 @Component({
@@ -23,10 +24,17 @@ export class SignIn {
   isLoading = signal<boolean>(false);
   errorMessage = signal<string>('');
 
-  constructor(private apiService: ApiService, private router: Router, private route: ActivatedRoute) {}
+  constructor(
+    private apiService: ApiService, 
+    private userService: UserService,
+    private router: Router, 
+    private route: ActivatedRoute
+  ) {}
+  
   ngOnInit() {
     this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
   }
+  
   login(): void {
     
     this.errorMessage.set('');
@@ -40,12 +48,29 @@ export class SignIn {
     this.apiService.login(this.email(), this.password()).subscribe({
       next: (response: any) => {
         console.log('Login successful:', response);
+        
         // Save token to localStorage
         if (response.token) {
           localStorage.setItem('auth_token', response.token);
         }
-        // Navigate to home or dashboard
-        this.router.navigate([this.returnUrl]);
+        
+        // Save user data
+        if (response.user || response) {
+          const userData = response.user || response;
+          this.userService.loginUser(userData);
+          
+          // Check if user is admin and route accordingly
+          if (userData.isAdmin === true) {
+            console.log('Admin user detected, routing to admin panel');
+            this.router.navigate(['/admin']);
+          } else {
+            // Regular user, navigate to return URL or home
+            this.router.navigate([this.returnUrl]);
+          }
+        } else {
+          // Fallback if no user data
+          this.router.navigate([this.returnUrl]);
+        }
       },
       error: (error: any) => {
         console.error('Login failed:', error);

@@ -11,6 +11,7 @@ import { ApiService } from '../../services/api.service';
 import { ProductMonthConfig } from '../../models/product.model';
 import { CartService } from '../../services/cart.service';
 import { CartItem } from '../../models/cart.model';
+import { ImageUrlPipe } from '../../pipes/image-url.pipe';
 
 @Component({
   selector: 'app-product-quick-view',
@@ -49,6 +50,8 @@ export class ProductQuickViewComponent implements OnChanges {
   dateValidationError: string = '';
   successMessage: string = '';
   
+  private imageUrlPipe = new ImageUrlPipe();
+  
   constructor(private cdr: ChangeDetectorRef, private apiService: ApiService, private cartService: CartService) {}  ngOnChanges(changes: SimpleChanges) {
     // Rebuild images when product changes OR when dialog becomes visible
     if ((changes['product'] && changes['product'].currentValue) || 
@@ -72,9 +75,10 @@ export class ProductQuickViewComponent implements OnChanges {
       if (this.product.imageUrls && this.product.imageUrls.length > 0) {
         // First, add the main image
         if (this.product.mainImageUrl) {
+          const transformedUrl = this.imageUrlPipe.transform(this.product.mainImageUrl);
           this.images.push({
-            itemImageSrc: this.product.mainImageUrl,
-            thumbnailImageSrc: this.product.mainImageUrl,
+            itemImageSrc: transformedUrl,
+            thumbnailImageSrc: transformedUrl,
             alt: this.product.productName
           });
         }
@@ -82,18 +86,20 @@ export class ProductQuickViewComponent implements OnChanges {
         // Then add all other images (excluding the main one)
         this.product.imageUrls.forEach((url: string) => {
           if (url !== this.product.mainImageUrl) {
+            const transformedUrl = this.imageUrlPipe.transform(url);
             this.images.push({
-              itemImageSrc: url,
-              thumbnailImageSrc: url,
+              itemImageSrc: transformedUrl,
+              thumbnailImageSrc: transformedUrl,
               alt: this.product.productName
             });
           }
         });
       } else if (this.product.mainImageUrl) {
         // Fallback: if no imageUrls array, just show the main image
+        const transformedUrl = this.imageUrlPipe.transform(this.product.mainImageUrl);
         this.images.push({
-          itemImageSrc: this.product.mainImageUrl,
-          thumbnailImageSrc: this.product.mainImageUrl,
+          itemImageSrc: transformedUrl,
+          thumbnailImageSrc: transformedUrl,
           alt: this.product.productName
         });
       }

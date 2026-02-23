@@ -110,6 +110,10 @@ public partial class ApiShopContext : DbContext
                 .HasMaxLength(100)
                 .HasColumnName("Product_Name");
 
+            entity.Property(e => e.IsActive)
+                .HasColumnName("Is_Active");
+                
+
             entity.HasOne(d => d.Category).WithMany(p => p.Products)
                 .HasForeignKey(d => d.CategoryId)
                 .HasConstraintName("FK__Products__Catego__5FB337D6");

@@ -1,0 +1,186 @@
+<p><p-dialog 
+  [(visible)]="visible"
+  [modal]="true"
+  [style]="{width: '90vw', maxWidth: '1200px'}"
+  [draggable]="false"
+  [resizable]="false"
+  styleClass="product-dialog"
+  (onHide)="hideDialog()">
+  
+  <ng-template pTemplate="header">
+    <h3 class="dialog-title">
+      <i class="pi pi-shopping-cart"></i>
+      {{ product ? 'Edit Product' : 'Add New Product' }}
+    </h3>
+  </ng-template>
+
+  <div class="product-form">
+    <!-- Basic Information Section -->
+    <div class="form-section">
+      <h4>Basic Information</h4>
+      
+      <div class="form-grid">
+        <div class="form-field full-width">
+          <label for="productName">Product Name *</label>
+          <input 
+            pInputText 
+            id="productName" 
+            [(ngModel)]="productName" 
+            placeholder="Enter product name"
+            class="w-full" />
+        </div>
+
+        <div class="form-field">
+          <label for="category">Category *</label>
+          <p-select 
+            [(ngModel)]="categoryId"
+            [options]="categories"
+            optionLabel="categoryName"
+            optionValue="categoryId"
+            placeholder="Select a category"
+            class="w-full">
+          </p-select>
+        </div>
+
+        <div class="form-field">
+          <label for="price">Base Price *</label>
+          <p-inputNumber 
+            [(ngModel)]="price"
+            mode="currency"
+            currency="USD"
+            locale="en-US"
+            [minFractionDigits]="2"
+            placeholder="0.00"
+            class="w-full">
+          </p-inputNumber>
+        </div>
+
+        <div class="form-field full-width">
+          <label for="description">Description</label>
+          <textarea 
+            pInputTextarea 
+            id="description" 
+            [(ngModel)]="description" 
+            rows="4"
+            placeholder="Enter product description"
+            class="w-full">
+          </textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Image Upload Section -->
+    <div class="form-section">
+      <h4>Product Images</h4>
+      
+      <div class="image-upload-section">
+        <input 
+          #fileInput
+          type="file" 
+          accept="image/*" 
+          multiple 
+          style="display: none" 
+          (change)="onFileSelect($event)" />
+        <button 
+          pButton 
+          type="button"
+          label="Upload Images" 
+          icon="pi pi-upload" 
+          class="upload-button"
+          (click)="fileInput.click()">
+        </button>
+
+        <div class="image-preview-grid" *ngIf="images.length > 0">
+          <div *ngFor="let image of images; let i = index" class="image-preview-card">
+            <div class="image-wrapper">
+              <img [src]="image.url | imageUrl" [alt]="'Product image ' + (i + 1)" />
+              
+              <div class="image-overlay">
+                <button 
+                  pButton 
+                  icon="pi pi-trash" 
+                  class="p-button-rounded p-button-danger p-button-sm"
+                  (click)="removeImage(i)"
+                  pTooltip="Remove image">
+                </button>
+              </div>
+
+              <div class="main-badge" *ngIf="image.isMain">
+                <i class="pi pi-star-fill"></i> Main
+              </div>
+            </div>
+
+            <div class="image-actions">
+              <p-radioButton 
+                name="mainImage"
+                [value]="i"
+                [ngModel]="getMainImageIndex()"
+                (ngModelChange)="setMainImage($event)"
+                [inputId]="'main-' + i">
+              </p-radioButton>
+              <label [for]="'main-' + i" class="radio-label">Set as main image</label>
+            </div>
+          </div>
+        </div>
+
+        <p class="hint-text" *ngIf="images.length === 0">
+          <i class="pi pi-info-circle"></i>
+          Upload at least one product image. The first image will be set as the main image by default.
+        </p>
+      </div>
+    </div>
+
+    <!-- Monthly Pricing Section -->
+    <div class="form-section">
+      <h4>Special Pricing by Month</h4>
+      <p class="section-description">
+        Set special prices for specific months. Leave empty to use the base price.
+      </p>
+
+      <div class="month-pricing-grid">
+        <div *ngFor="let month of monthConfigs" class="month-card">
+          <div class="month-header">
+            <span class="month-name">{{ month.monthName }}</span>
+            <p-checkbox 
+              [(ngModel)]="month.isAvailable" 
+              [binary]="true"
+              [inputId]="'available-' + month.monthNumber">
+            </p-checkbox>
+          </div>
+          
+          <div class="month-price">
+            <p-inputNumber 
+              [(ngModel)]="month.specialPrice"
+              mode="currency"
+              currency="USD"
+              locale="en-US"
+              [minFractionDigits]="2"
+              [disabled]="!month.isAvailable"
+              placeholder="Base price"
+              class="w-full">
+            </p-inputNumber>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <div class="dialog-footer">
+      <button 
+        pButton 
+        label="Cancel" 
+        icon="pi pi-times" 
+        class="p-button-text"
+        (click)="hideDialog()">
+      </button>
+      <button 
+        pButton 
+        label="Save Product" 
+        icon="pi pi-check" 
+        class="p-button-success"
+        (click)="saveProduct()">
+      </button>
+    </div>
+  </ng-template>
+</p-dialog></p>

@@ -1,0 +1,200 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+:host {
+  font-family: 'Inter', sans-serif;
+}
+
+.admin-category-container {
+  width: 100%;
+}
+
+.card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+// Toolbar Styles
+.add-button {
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+}
+
+// Table Styles
+.category-name {
+  font-weight: 600;
+  color: #1e293b;
+  font-size: 1rem;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  align-items: center;
+}
+
+.empty-message {
+  padding: 0 !important;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  
+  i {
+    font-size: 4rem;
+    color: #cbd5e1;
+    margin-bottom: 1rem;
+  }
+  
+  p {
+    color: #64748b;
+    font-size: 1.125rem;
+    margin-bottom: 1.5rem;
+  }
+}
+
+// Dialog Styles
+.dialog-content {
+  padding: 1rem 0;
+}
+
+.form-field {
+  margin-bottom: 1.5rem;
+  
+  label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #334155;
+    font-size: 0.95rem;
+  }
+  
+  input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s;
+    
+    &:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+  }
+}
+
+.w-full {
+  width: 100%;
+}
+
+// PrimeNG Overrides
+:host ::ng-deep {
+  .category-toolbar {
+    background: #f8f9fa;
+    border: none;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 1rem 1.5rem;
+  }
+  
+  .category-table {
+    .p-datatable-header {
+      background: #f8f9fa;
+      border: none;
+      padding: 1rem 1.5rem;
+    }
+    
+    .p-datatable-thead > tr > th {
+      background: #f1f5f9;
+      color: #334155;
+      font-weight: 600;
+      padding: 1rem;
+      border: none;
+      border-bottom: 2px solid #e2e8f0;
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .p-datatable-tbody > tr {
+      transition: all 0.2s;
+      
+      &:hover {
+        background: #f8fafc !important;
+      }
+      
+      > td {
+        padding: 1rem;
+        border-bottom: 1px solid #f1f5f9;
+        vertical-align: middle;
+      }
+    }
+  }
+  
+  .p-button-rounded {
+    width: 2.5rem;
+    height: 2.5rem;
+    
+    &.p-button-info:hover {
+      background: rgba(59, 130, 246, 0.1) !important;
+      color: #3b82f6 !important;
+    }
+    
+    &.p-button-danger:hover {
+      background: rgba(239, 68, 68, 0.1) !important;
+      color: #ef4444 !important;
+    }
+  }
+  
+  .p-dialog {
+    .p-dialog-header {
+      background: #f8f9fa;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 1.5rem;
+      
+      .p-dialog-title {
+        font-weight: 600;
+        color: #1e293b;
+      }
+    }
+    
+    .p-dialog-content {
+      padding: 1.5rem;
+    }
+    
+    .p-dialog-footer {
+      background: #f8f9fa;
+      border-top: 1px solid #e2e8f0;
+      padding: 1rem 1.5rem;
+      
+      button {
+        margin-left: 0.5rem;
+      }
+    }
+  }
+  
+  .p-toast {
+    .p-toast-message {
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+  }
+  
+  .p-confirm-dialog {
+    .p-dialog-header {
+      background: #fef2f2;
+      
+      .p-dialog-title {
+        color: #991b1b;
+      }
+    }
+  }
+}
+
+.text-center {
+  text-align: center;
+}

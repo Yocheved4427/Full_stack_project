@@ -20,7 +20,6 @@ namespace WebApiShop.Controllers
 
 
         [HttpGet]
-
         public async Task<ActionResult<IEnumerable<CategoryDTO>>> Get()
         {
             IEnumerable<CategoryDTO> categories = await _ICategoriesServices.GetCategories();
@@ -29,17 +28,58 @@ namespace WebApiShop.Controllers
             return NoContent();
         }
 
+        [HttpGet("{id}")]
+        public async Task<ActionResult<CategoryDTO>> GetById(int id)
+        {
+            var category = await _ICategoriesServices.GetCategoryById(id);
+            if (category != null)
+                return Ok(category);
+            return NotFound();
+        }
 
-        //[HttpGet("{id}")]
+        [HttpPost]
+        public async Task<ActionResult<CategoryDTO>> Post([FromBody] CategoryDTO categoryDto)
+        {
+            try
+            {
+                var addedCategory = await _ICategoriesServices.AddCategory(categoryDto);
+                return CreatedAtAction(nameof(GetById), new { id = addedCategory.CategoryId }, addedCategory);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
 
-        //[HttpPost("Login")]
+        [HttpPut("{id}")]
+        public async Task<ActionResult<CategoryDTO>> Put(int id, [FromBody] CategoryDTO categoryDto)
+        {
+            try
+            {
+                var updatedCategory = await _ICategoriesServices.UpdateCategory(id, categoryDto);
+                if (updatedCategory != null)
+                    return Ok(updatedCategory);
+                return NotFound();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
 
-
-        //[HttpPost]
-
-
-        //// PUT api/<Users>/5
-        //[HttpPut("{id}")]
+        [HttpDelete("{id}")]
+        public async Task<ActionResult> Delete(int id)
+        {
+            try
+            {
+                await _ICategoriesServices.DeleteCategory(id);
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
 
     }
 }

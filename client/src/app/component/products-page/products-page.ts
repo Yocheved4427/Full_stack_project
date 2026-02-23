@@ -11,12 +11,11 @@ import { takeUntil, switchMap } from 'rxjs/operators';
 import { ProductQuickViewComponent } from '../product-quick-view/product-quick-view';
 import { CartService } from '../../services/cart.service';
 import { UserService } from '../../services/user.service';
-import { SignIn } from '../sign-in/sign-in';
 
 @Component({
   selector: 'app-products-page',
   standalone: true,
-  imports: [CommonModule, ProductCard, Filters, ProductQuickViewComponent, SignIn], // ודאי שכל אלו כאן
+  imports: [CommonModule, ProductCard, Filters, ProductQuickViewComponent],
   templateUrl: './products-page.html',
   styleUrl: './products-page.scss'
 })
@@ -30,9 +29,12 @@ export class ProductsPageComponent implements OnInit, OnDestroy {
   // משתנים מקוריים
   allProducts: Product[] = [];
   displayProducts: Product[] = [];
+  paginatedProducts: Product[] = [];
   totalItems: number = 0;
   hasNextPage: boolean = false;
-  currentFilters: ProductFilter = { page: 0, pageSize: 12 };
+  currentFilters: ProductFilter = { page: 0, pageSize: 6 };
+  currentPage: number = 0;
+  pageSize: number = 6;
   isLoading: boolean = false;
   cartItemCount: number = 0;
   
@@ -61,13 +63,21 @@ export class ProductsPageComponent implements OnInit, OnDestroy {
       next: (response: any) => {
         console.log('Products response:', response);
         if (response && response.data && Array.isArray(response.data)) {
-          this.allProducts = response.data;
-          this.displayProducts = response.data;
+          // Sort products by name alphabetically
+          this.allProducts = response.data.sort((a: any, b: any) => 
+            a.productName.localeCompare(b.productName)
+          );
+          this.displayProducts = [...this.allProducts];
+          this.totalItems = this.allProducts.length;
+          this.currentPage = 0;
+          this.updatePaginatedProducts();
           console.log('Loaded products:', this.displayProducts.length);
         } else {
           console.warn('No data in response or not an array');
           this.allProducts = [];
           this.displayProducts = [];
+          this.paginatedProducts = [];
+          this.totalItems = 0;
         }
         this.isLoading = false;
         this.cdr.detectChanges();
@@ -77,6 +87,8 @@ export class ProductsPageComponent implements OnInit, OnDestroy {
         this.isLoading = false;
         this.allProducts = [];
         this.displayProducts = [];
+        this.paginatedProducts = [];
+        this.totalItems = 0;
         this.cdr.detectChanges();
       }
     });
@@ -112,7 +124,24 @@ export class ProductsPageComponent implements OnInit, OnDestroy {
       );
     }
     
+    // Sort filtered products by name alphabetically
+    filtered.sort((a, b) => a.productName.localeCompare(b.productName));
+    
     this.displayProducts = filtered;
+    this.totalItems = filtered.length;
+    this.currentPage = 0; // Reset to first page when filters change
+    this.updatePaginatedProducts();
+  }
+
+  updatePaginatedProducts() {
+    const startIndex = this.currentPage * this.pageSize;
+    const endIndex = startIndex + this.pageSize;
+    this.paginatedProducts = this.displayProducts.slice(startIndex, endIndex);
+  }
+
+  onPageChange(newPage: number) {
+    this.currentPage = newPage;
+    this.updatePaginatedProducts();
   }
 
   // 👇 פונקציה לפתיחת ה-Quick View
