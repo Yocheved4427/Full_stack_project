@@ -14,6 +14,53 @@ namespace WebApiShop.Controllers
             _environment = environment;
         }
 
+        [HttpGet("image")]
+        public IActionResult GetImage([FromQuery] string path)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(path))
+                    return BadRequest("Image path is required");
+
+                // Remove "images/" prefix if present
+                var relativePath = path.StartsWith("images/") ? path.Substring("images/".Length) : path;
+                
+                var fullPath = Path.Combine(ClientImagesPath, relativePath);
+                var normalizedPath = Path.GetFullPath(fullPath);
+
+                // Security check: ensure file is within client images directory
+                if (!normalizedPath.StartsWith(ClientImagesPath))
+                    return BadRequest("Invalid file path");
+
+                if (!System.IO.File.Exists(normalizedPath))
+                    return NotFound();
+
+                var contentType = GetContentType(normalizedPath);
+                var fileBytes = System.IO.File.ReadAllBytes(normalizedPath);
+                
+                return File(fileBytes, contentType);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error retrieving image: {ex.Message}");
+            }
+        }
+
+        private string GetContentType(string path)
+        {
+            var ext = Path.GetExtension(path).ToLowerInvariant();
+            return ext switch
+            {
+                ".jpg" or ".jpeg" => "image/jpeg",
+                ".png" => "image/png",
+                ".gif" => "image/gif",
+                ".webp" => "image/webp",
+                ".bmp" => "image/bmp",
+                ".svg" => "image/svg+xml",
+                _ => "application/octet-stream"
+            };
+        }
+
         [HttpGet("list")]
         public ActionResult<List<string>> GetProductImages([FromQuery] string categoryName, [FromQuery] string productName)
         {

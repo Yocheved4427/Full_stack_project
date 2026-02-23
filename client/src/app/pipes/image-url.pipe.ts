@@ -18,12 +18,9 @@ export class ImageUrlPipe implements PipeTransform {
       return `https://localhost:44386/${url}`;
     }
     
-    // If path starts with "images/", it's from client/public folder
-    // Split the path, encode each segment, then rejoin
+    // If path starts with "images/", serve it through the backend API
     if (url.startsWith('images/')) {
-      const parts = url.split('/');
-      const encodedParts = parts.map(part => encodeURIComponent(part));
-      return '/' + encodedParts.join('/');
+      return `https://localhost:44386/api/ImageUpload/image?path=${encodeURIComponent(url)}`;
     }
     
     // Fallback: return as-is and let browser handle it

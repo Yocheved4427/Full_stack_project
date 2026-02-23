@@ -287,8 +287,6 @@ export class AdminProduct implements OnInit, OnChanges {
           input.value = ''; // Clear the input even on error
         }
       });
-    } else {
-      console.warn('No files selected');
     }
   }
 
