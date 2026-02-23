@@ -39,4 +39,13 @@ export class UserService {
     const user = this.getCurrentUser();
     return user?.isAdmin ? 'admin' : 'user';
   }
+
+  // 7. Update user data in localStorage
+  updateUserData(userData: any) {
+    const currentUser = this.getCurrentUser();
+    if (currentUser) {
+      const updatedUser = { ...currentUser, ...userData };
+      localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+    }
+  }
 }

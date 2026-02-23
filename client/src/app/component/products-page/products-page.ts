@@ -163,13 +163,16 @@ export class ProductsPageComponent implements OnInit, OnDestroy {
   trackByProductId(index: number, product: Product): number {
     return product.productId;
   }
-  goToRegister() {
-    // שומרים את הכתובת הנוכחית ומעבירים אותה כפרמטר לעמוד ה-login
-     
-    // שלב א': מנתקים את המשתמש הקיים (מוחקים את הזיכרון)
-    this.userService.logoutUser();
+  
+  goToUserArea() {
+    const currentUser = this.userService.getCurrentUser();
     
-    // שלב ב': מעבירים אותו לדף ההרשמה כשהוא כבר נקי ו"אורח"
-    this.router.navigate(['/sign-in'], { queryParams: { returnUrl: this.router.url } });
+    if (currentUser) {
+      // User is logged in, go to user profile
+      this.router.navigate(['/user-profile']);
+    } else {
+      // User is not logged in, go to sign-in page
+      this.router.navigate(['/sign-in'], { queryParams: { returnUrl: '/user-profile' } });
+    }
   }
 }

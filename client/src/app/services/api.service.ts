@@ -29,4 +29,16 @@ export class ApiService {
   register(signupData: any): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/Users`, signupData);
   }
+
+  getUserOrders(userId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/Orders/user/${userId}`);
+  }
+
+  updateUser(userData: any): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl}/Users/${userData.id}`, userData);
+  }
+
+  changePassword(passwordData: any): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/Users/change-password`, passwordData);
+  }
 }

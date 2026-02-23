@@ -1,10 +1,12 @@
 import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { DialogModule } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
 import { DatePickerModule } from 'primeng/datepicker';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { GalleriaModule } from 'primeng/galleria';
+import { Tooltip } from 'primeng/tooltip';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
 import { ProductMonthConfig } from '../../models/product.model';
@@ -22,6 +24,7 @@ import { ImageUrlPipe } from '../../pipes/image-url.pipe';
     DatePickerModule,
     InputNumberModule,
     GalleriaModule,
+    Tooltip,
     FormsModule
   ],
   templateUrl: './product-quick-view.html',
@@ -50,7 +53,12 @@ export class ProductQuickViewComponent implements OnChanges {
   
   private imageUrlPipe = new ImageUrlPipe();
   
-  constructor(private cdr: ChangeDetectorRef, private apiService: ApiService, private cartService: CartService) {}  ngOnChanges(changes: SimpleChanges) {
+  constructor(
+    private cdr: ChangeDetectorRef, 
+    private apiService: ApiService, 
+    private cartService: CartService,
+    private router: Router
+  ) {}  ngOnChanges(changes: SimpleChanges) {
     // Rebuild images when product changes OR when dialog becomes visible
     if ((changes['product'] && changes['product'].currentValue) || 
         (changes['visible'] && changes['visible'].currentValue && this.product)) {
@@ -255,6 +263,11 @@ export class ProductQuickViewComponent implements OnChanges {
       this.successMessage = '';
       this.cdr.detectChanges();
     }, 3000);
+  }
+
+  goToCart() {
+    this.close();
+    this.router.navigate(['/cart']);
   }
 
   close() {

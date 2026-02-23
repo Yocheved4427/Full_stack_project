@@ -91,3 +91,30 @@ p {
     color: #333; 
     transform: translateY(-3px); 
 }
+
+// Sign in button in upper right corner
+.sign-in-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    width: 50px;
+    height: 50px;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    transition: all 0.3s ease;
+    
+    &:hover {
+        background: rgba(255, 255, 255, 0.9);
+        color: #667eea;
+        border-color: white;
+        transform: scale(1.1);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    }
+    
+    .pi {
+        font-size: 1.5rem;
+    }
+}

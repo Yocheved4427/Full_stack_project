@@ -1,0 +1,213 @@
+<p-toast></p-toast>
+
+<div class="user-profile-container">
+  <div class="profile-header">
+    <button 
+      pButton 
+      icon="pi pi-arrow-left" 
+      class="p-button-text p-button-rounded back-btn"
+      (click)="goBack()"
+      pTooltip="Back to Products">
+    </button>
+    <h1>My Account</h1>
+    <button 
+      pButton 
+      label="Logout" 
+      icon="pi pi-sign-out" 
+      class="p-button-danger p-button-outlined logout-btn"
+      (click)="logout()">
+    </button>
+  </div>
+
+  <div class="tab-navigation">
+    <button 
+      pButton 
+      [label]="'Profile Details'" 
+      [icon]="'pi pi-user'" 
+      [class]="activeTab() === 'profile' ? 'p-button-raised' : 'p-button-outlined'"
+      (click)="activeTab.set('profile')">
+    </button>
+    <button 
+      pButton 
+      [label]="'Order History'" 
+      [icon]="'pi pi-shopping-bag'" 
+      [class]="activeTab() === 'orders' ? 'p-button-raised' : 'p-button-outlined'"
+      (click)="activeTab.set('orders')">
+    </button>
+  </div>
+
+  <div *ngIf="activeTab() === 'profile'" class="profile-content">
+        <p-card>
+          <ng-template pTemplate="header">
+            <div class="card-header">
+              <h2>Personal Information</h2>
+              <p class="subtitle">Update your personal details</p>
+            </div>
+          </ng-template>
+
+          <div class="form-grid">
+            <div class="form-field">
+              <label for="firstName">First Name *</label>
+              <input 
+                pInputText 
+                id="firstName" 
+                [ngModel]="firstName()"
+                (ngModelChange)="firstName.set($event)"
+                placeholder="Enter first name"
+                class="w-full" />
+            </div>
+
+            <div class="form-field">
+              <label for="lastName">Last Name *</label>
+              <input 
+                pInputText 
+                id="lastName" 
+                [ngModel]="lastName()"
+                (ngModelChange)="lastName.set($event)"
+                placeholder="Enter last name"
+                class="w-full" />
+            </div>
+
+            <div class="form-field full-width">
+              <label for="email">Email Address *</label>
+              <input 
+                pInputText 
+                id="email" 
+                type="email"
+                [ngModel]="email()"
+                (ngModelChange)="email.set($event)"
+                placeholder="Enter email address"
+                class="w-full" />
+            </div>
+          </div>
+
+          <ng-template pTemplate="footer">
+            <button 
+              pButton 
+              label="Save Changes" 
+              icon="pi pi-check" 
+              class="p-button-success"
+              [loading]="isSavingProfile()"
+              (click)="saveProfile()">
+            </button>
+          </ng-template>
+        </p-card>
+
+        <p-card styleClass="password-card">
+          <ng-template pTemplate="header">
+            <div class="card-header">
+              <h2>Change Password</h2>
+              <p class="subtitle">Update your password</p>
+            </div>
+          </ng-template>
+
+          <div class="form-grid">
+            <div class="form-field full-width">
+              <label for="currentPassword">Current Password *</label>
+              <input 
+                pInputText 
+                id="currentPassword" 
+                type="password"
+                [ngModel]="currentPassword()"
+                (ngModelChange)="currentPassword.set($event)"
+                placeholder="Enter current password"
+                class="w-full" />
+            </div>
+
+            <div class="form-field">
+              <label for="newPassword">New Password *</label>
+              <input 
+                pInputText 
+                id="newPassword" 
+                type="password"
+                [ngModel]="newPassword()"
+                (ngModelChange)="newPassword.set($event)"
+                placeholder="Enter new password"
+                class="w-full" />
+            </div>
+
+            <div class="form-field">
+              <label for="confirmPassword">Confirm Password *</label>
+              <input 
+                pInputText 
+                id="confirmPassword" 
+                type="password"
+                [ngModel]="confirmPassword()"
+                (ngModelChange)="confirmPassword.set($event)"
+                placeholder="Confirm new password"
+                class="w-full" />
+            </div>
+          </div>
+
+          <ng-template pTemplate="footer">
+            <button 
+              pButton 
+              label="Change Password" 
+              icon="pi pi-lock" 
+              class="p-button-warning"
+              (click)="changePassword()">
+            </button>
+          </ng-template>
+        </p-card>
+      </div>
+
+  <div *ngIf="activeTab() === 'orders'" class="orders-content">
+        <p-card>
+          <ng-template pTemplate="header">
+            <div class="card-header">
+              <h2>My Orders</h2>
+              <p class="subtitle">View your order history</p>
+            </div>
+          </ng-template>
+
+          <p-table 
+            [value]="orders()" 
+            [loading]="isLoadingOrders()"
+            [paginator]="true"
+            [rows]="10"
+            [showCurrentPageReport]="true"
+            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} orders"
+            [tableStyle]="{'min-width': '50rem'}">
+            
+            <ng-template pTemplate="header">
+              <tr>
+                <th pSortableColumn="orderId">Order ID</th>
+                <th pSortableColumn="orderDate">Date</th>
+                <th>Items</th>
+                <th pSortableColumn="totalAmount">Total</th>
+                <th pSortableColumn="status">Status</th>
+              </tr>
+            </ng-template>
+            
+            <ng-template pTemplate="body" let-order>
+              <tr>
+                <td>{{ order.orderId }}</td>
+                <td>{{ order.orderDate | date:'short' }}</td>
+                <td>
+                  <ul class="order-items-list">
+                    <li *ngFor="let item of order.items">
+                      {{ item.productName }} (x{{ item.quantity }})
+                    </li>
+                  </ul>
+                </td>
+                <td>{{ order.totalAmount | currency }}</td>
+                <td>
+                  <span [class]="'status-badge status-' + order.status.toLowerCase()">
+                    {{ order.status }}
+                  </span>
+                </td>
+              </tr>
+            </ng-template>
+            
+            <ng-template pTemplate="emptymessage">
+              <tr>
+                <td colspan="5" class="empty-message">
+                  <i class="pi pi-inbox"></i>
+                  <p>No orders found</p>
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </p-card>
+      </div>
+</div>

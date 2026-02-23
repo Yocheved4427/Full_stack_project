@@ -1,4 +1,14 @@
 <p-dialog [(visible)]="visible" (onHide)="close()" [modal]="true" [header]="''" [style]="{width: '1400px', maxWidth: '98vw'}" [contentStyle]="{padding: '1.5rem', overflow: 'visible'}">
+  <!-- Cart Icon Button -->
+  <button 
+    pButton 
+    icon="pi pi-shopping-cart" 
+    class="p-button-rounded p-button-text cart-icon-btn"
+    (click)="goToCart()"
+    pTooltip="View Cart"
+    tooltipPosition="bottom">
+  </button>
+  
   <div class="quick-view-content" *ngIf="product">
     
     <div class="gallery" *ngIf="images.length > 0">

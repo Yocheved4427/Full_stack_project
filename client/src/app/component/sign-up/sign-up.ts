@@ -87,8 +87,8 @@ export class SignUp {
     this.apiService.register(signupData).subscribe({
       next: (response: any) => {
         console.log("Signup successful:", response);
-        // Navigate to sign-in page after successful signup
-        this.router.navigate(["/sign-in"]);
+        // Navigate to products page after successful signup
+        this.router.navigate(["/products"]);
       },
       error: (error: any) => {
         console.error("Signup failed:", error);

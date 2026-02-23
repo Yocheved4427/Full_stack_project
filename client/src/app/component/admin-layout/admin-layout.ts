@@ -51,7 +51,7 @@ export class AdminLayout {
   logout(): void {
     // Use UserService to logout
     this.userService.logoutUser();
-    // Navigate to home
-    this.router.navigate(['/']);
+    // Navigate to products page
+    this.router.navigate(['/products']);
   }
 }

@@ -17,7 +17,7 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
   styleUrls: ['./sign-in.scss'],
 })
 export class SignIn {
-  returnUrl: string = '/';
+  returnUrl: string = '/products';
   checked1 = signal<boolean>(true);
   email = signal<string>('');
   password = signal<string>('');
@@ -32,7 +32,7 @@ export class SignIn {
   ) {}
   
   ngOnInit() {
-    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
+    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/products';
   }
   
   login(): void {

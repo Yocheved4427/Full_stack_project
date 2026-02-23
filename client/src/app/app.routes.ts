@@ -4,6 +4,7 @@ import { ProductsPageComponent } from './component/products-page/products-page';
 import { Cart } from './component/cart/cart';
 import { SignIn } from './component/sign-in/sign-in';
 import { SignUp } from './component/sign-up/sign-up';
+import { UserProfile } from './component/user-profile/user-profile';
 import { AdminLayout } from './component/admin-layout/admin-layout';
 import { AdminProductList } from './component/admin-product-list/admin-product-list';
 import { AdminCategory } from './component/admin-category/admin-category';
@@ -15,6 +16,7 @@ export const routes: Routes = [
   { path: 'cart', component: Cart },
   { path: 'sign-in', component: SignIn },
   { path: 'sign-up', component: SignUp },
+  { path: 'user-profile', component: UserProfile },
   {
     path: 'admin',
     component: AdminLayout,
