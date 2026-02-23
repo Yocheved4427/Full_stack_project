@@ -84,11 +84,15 @@
       <div class="summary-card" *ngIf="totalNights > 0">
         <div class="summary-line"><span>Nights:</span> <strong>{{totalNights}}</strong></div>
         <div class="summary-line"><span>Participants:</span> <strong>{{participants}}</strong></div>
-        <div class="total-line"><span>Total Price:</span> <strong>{{totalPrice | currency}}</strong></div>
+        <div class="total-line"><span>Total Price:</span> <strong>{{ totalPrice | currency:'USD':'symbol':'1.0-0' }}</strong></div>
       </div>
 
-      <button pButton label="Add to Cart" icon="pi pi-shopping-cart" class="add-to-cart-btn" 
-              [disabled]="!isFormValid()" (click)="addToCart()"></button>
+            <div class="quick-view-actions">
+        <button pButton label="Add to Cart" icon="pi pi-shopping-cart" class="add-to-cart-btn" 
+          [disabled]="!isFormValid()" (click)="addToCart()"></button>
+
+        <button pButton label="To the cart" icon="pi pi-arrow-right" class="go-to-cart-btn" routerLink="/cart"></button>
+            </div>
       
       <div *ngIf="successMessage" class="success-message">{{ successMessage }}</div>
 
