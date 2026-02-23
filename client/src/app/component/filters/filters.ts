@@ -1,4 +1,4 @@
-import { Component, OnInit, Output, EventEmitter, ChangeDetectorRef, OnDestroy } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter, ChangeDetectorRef, OnDestroy, Input } from '@angular/core';
 import { CategoryService } from '../../services/category.service';
 import { Category } from '../../models/category.model';
 import { ProductFilter } from '../../models/filter.model';
@@ -12,7 +12,8 @@ import { PanelModule } from 'primeng/panel';
 import { ListboxModule } from 'primeng/listbox';
 import { SliderModule } from 'primeng/slider';
 import { ButtonModule } from 'primeng/button';
-import { InputTextModule } from 'primeng/inputtext'; 
+import { InputTextModule } from 'primeng/inputtext';
+import { Paginator } from 'primeng/paginator';
 
 @Component({
   selector: 'app-filters',
@@ -24,13 +25,18 @@ import { InputTextModule } from 'primeng/inputtext';
     ListboxModule, 
     SliderModule, 
     ButtonModule,
-    InputTextModule
+    InputTextModule,
+    Paginator
   ],
   templateUrl: './filters.html',
   styleUrls: ['./filters.scss']
 })
 export class Filters implements OnInit, OnDestroy {
   @Output() filtersChanged = new EventEmitter<ProductFilter>();
+  @Output() pageChanged = new EventEmitter<number>();
+  @Input() totalItems: number = 0;
+  @Input() pageSize: number = 6;
+  @Input() currentPage: number = 0;
 
   categories: Category[] = [];
   selectedCategories: any[] = [];
@@ -66,7 +72,7 @@ export class Filters implements OnInit, OnDestroy {
     this.searchSubject.next(this.searchTerm);
   }
 
-updateFilters() {
+  updateFilters() {
     const categoryIds = this.selectedCategories.length > 0 
       ? this.selectedCategories.map(c => c.categoryId)
       : undefined;
@@ -82,7 +88,12 @@ updateFilters() {
 
     console.log('✅ שולח פילטרים לשרת:', filters);
     this.filtersChanged.emit(filters);
-}
+  }
+
+  onPageChange(event: any) {
+    this.pageChanged.emit(event.page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
 
   reset() {
     this.selectedCategories = [];

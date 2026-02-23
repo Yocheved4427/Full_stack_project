@@ -1,0 +1,111 @@
+<div class="admin-category-container">
+  <p-toast></p-toast>
+  <p-confirmDialog></p-confirmDialog>
+
+  <div class="card">
+    <!-- Toolbar -->
+    <p-toolbar styleClass="category-toolbar">
+      <ng-template pTemplate="left">
+        <button pButton 
+                label="Add New Category" 
+                icon="pi pi-plus" 
+                class="p-button-success add-button"
+                (click)="addNewCategory()">
+        </button>
+      </ng-template>
+    </p-toolbar>
+
+    <!-- Data Table -->
+    <p-table 
+      #dt
+      [value]="categories()"
+      [loading]="loading()"
+      styleClass="category-table"
+      responsiveLayout="scroll">
+      
+      <ng-template pTemplate="header">
+        <tr>
+          <th style="width: 100px">ID</th>
+          <th>Category Name</th>
+          <th style="width: 150px" class="text-center">Actions</th>
+        </tr>
+      </ng-template>
+      
+      <ng-template pTemplate="body" let-category>
+        <tr>
+          <td>{{ category.categoryId }}</td>
+          <td>
+            <div class="category-name">{{ category.categoryName }}</div>
+          </td>
+          <td class="action-buttons">
+            <button pButton 
+                    icon="pi pi-pencil" 
+                    class="p-button-rounded p-button-text p-button-info"
+                    pTooltip="Edit"
+                    tooltipPosition="top"
+                    (click)="editCategory(category)">
+            </button>
+            <button pButton 
+                    icon="pi pi-trash" 
+                    class="p-button-rounded p-button-text p-button-danger"
+                    pTooltip="Delete"
+                    tooltipPosition="top"
+                    (click)="deleteCategory(category)">
+            </button>
+          </td>
+        </tr>
+      </ng-template>
+      
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="3" class="empty-message">
+            <div class="empty-state">
+              <i class="pi pi-inbox"></i>
+              <p>No categories found</p>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+</div>
+
+<!-- Add/Edit Category Dialog -->
+<p-dialog 
+  [(visible)]="showCategoryDialog" 
+  [header]="isEditMode ? 'Edit Category' : 'Add New Category'"
+  [modal]="true"
+  [closable]="true"
+  [style]="{width: '450px'}"
+  (onHide)="hideDialog()">
+  
+  <div class="dialog-content">
+    <div class="form-field">
+      <label for="categoryName">Category Name *</label>
+      <input 
+        id="categoryName"
+        type="text" 
+        pInputText 
+        [(ngModel)]="categoryForm.categoryName"
+        placeholder="Enter category name"
+        class="w-full" />
+    </div>
+  </div>
+  
+  <ng-template pTemplate="footer">
+    <button 
+      pButton 
+      label="Cancel" 
+      icon="pi pi-times" 
+      class="p-button-text"
+      (click)="hideDialog()">
+    </button>
+    <button 
+      pButton 
+      [label]="isEditMode ? 'Update' : 'Save'" 
+      icon="pi pi-check" 
+      (click)="saveCategory()"
+      [disabled]="!categoryForm.categoryName?.trim()">
+    </button>
+  </ng-template>
+</p-dialog>

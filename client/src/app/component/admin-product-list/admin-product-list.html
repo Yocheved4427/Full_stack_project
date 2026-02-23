@@ -1,0 +1,124 @@
+<div class="admin-product-container">
+  <p-toast></p-toast>
+  <p-confirmDialog></p-confirmDialog>
+
+  <div class="card">
+    <!-- Toolbar -->
+    <p-toolbar styleClass="product-toolbar">
+      <ng-template pTemplate="left">
+        <button pButton 
+                label="Add New Product" 
+                icon="pi pi-plus" 
+                class="p-button-success add-button"
+                (click)="addNewProduct()">
+        </button>
+      </ng-template>
+      
+      <ng-template pTemplate="right">
+        <span class="p-input-icon-left search-box">
+          <i class="pi pi-search"></i>
+          <input pInputText 
+                 type="text" 
+                 [(ngModel)]="globalFilterValue"
+                 (input)="dt.filterGlobal($any($event.target).value, 'contains')" 
+                 placeholder="Search products..." 
+                 class="search-input" />
+        </span>
+      </ng-template>
+    </p-toolbar>
+
+    <!-- Data Table -->
+    <p-table 
+      #dt
+      [value]="products()"
+      [loading]="loading()"
+      [paginator]="true"
+      [rows]="rows"
+      [first]="first"
+      [globalFilterFields]="['productName', 'description']"
+      [rowsPerPageOptions]="[10, 25, 50]"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products"
+      styleClass="product-table"
+      responsiveLayout="scroll">
+      
+      <ng-template pTemplate="header">
+        <tr>
+          <th style="width: 80px">Image</th>
+          <th pSortableColumn="productName">Product Name <p-sortIcon field="productName"></p-sortIcon></th>
+          <th pSortableColumn="categoryId">Category <p-sortIcon field="categoryId"></p-sortIcon></th>
+          <th pSortableColumn="price" style="width: 150px">Price <p-sortIcon field="price"></p-sortIcon></th>
+          <th style="width: 120px">Status</th>
+          <th style="width: 150px" class="text-center">Actions</th>
+        </tr>
+      </ng-template>
+      
+      <ng-template pTemplate="body" let-product>
+        <tr>
+          <td>
+            <img [src]="product.mainImageUrl || '/images/placeholder.png'" 
+                 [alt]="product.productName" 
+                 class="product-image" />
+          </td>
+          <td>
+            <div class="product-name">{{ product.productName }}</div>
+            <div class="product-desc">{{ product.description.substring(0, 60) }}...</div>
+          </td>
+          <td>
+            <span class="category-badge">{{ getCategoryName(product.categoryId) }}</span>
+          </td>
+          <td>
+            <span class="product-price">{{ product.price | currency }}</span>
+          </td>
+          <td>
+            <p-tag 
+              [value]="getStatusLabel(product.isActive)" 
+              [severity]="getStatusSeverity(product.isActive)">
+            </p-tag>
+          </td>
+          <td class="action-buttons">
+            <button pButton 
+                    icon="pi pi-pencil" 
+                    class="p-button-rounded p-button-text p-button-info"
+                    pTooltip="Edit"
+                    tooltipPosition="top"
+                    (click)="editProduct(product)">
+            </button>
+            <button pButton 
+                    icon="pi pi-trash" 
+                    class="p-button-rounded p-button-text p-button-danger"
+                    pTooltip="Delete"
+                    tooltipPosition="top"
+                    (click)="deleteProduct(product)">
+            </button>
+          </td>
+        </tr>
+      </ng-template>
+      
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="6" class="empty-message">
+            <div class="empty-state">
+              <i class="pi pi-inbox"></i>
+              <p>No products found</p>
+              <button pButton 
+                      label="Add First Product" 
+                      icon="pi pi-plus" 
+                      class="p-button-sm"
+                      (click)="addNewProduct()">
+              </button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+
+  <!-- Product Add/Edit Dialog -->
+  <app-admin-product
+    [(visible)]="showProductDialog"
+    [product]="selectedProduct"
+    [categories]="categories()"
+    (onSave)="onProductSave($event)">
+  </app-admin-product>
+</div>

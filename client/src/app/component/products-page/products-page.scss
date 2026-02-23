@@ -1,8 +1,9 @@
 .page-wrapper {
-  min-height: 100vh;
+  height: 100vh;
   background: #f8f9fa;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 // Top Header with animated text
@@ -108,7 +109,7 @@
   }
 }
 
-// Main Layout - Fixed positioning
+// Main Layout - Flexible positioning
 .page-layout {
   display: flex;
   width: 100%;
@@ -120,20 +121,58 @@
 app-filters {
   width: 20%;
   height: 100%;
-  overflow-y: auto;
   border-right: 1px solid #dee2e6;
   background: white;
+  overflow-y: auto;
+  overflow-x: hidden;
+  
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+  }
+  
+  &::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+  }
 }
 
-// Products Section - Fixed right 80%
+// Products Section - Flexible right 80%
 .products-section {
   width: 80%;
   height: 100%;
-  overflow: hidden;
   padding: 2rem;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+  
+  /* Styled scrollbar */
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+  }
+  
+  &::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+  }
 }
 
 .products-grid {
@@ -141,10 +180,8 @@ app-filters {
   grid-template-columns: repeat(3, 1fr);
   gap: 1.5rem;
   max-width: 1400px;
-  margin: 0 auto;
-  height: 100%;
-  grid-auto-rows: minmax(0, 1fr);
-  overflow: hidden;
+  margin: 0 auto 2rem auto;
+  width: 100%;
 }
 
 app-product-card {
@@ -156,7 +193,6 @@ app-product-card {
     
     .p-card {
       height: 100%;
-      max-height: calc((100vh - 50px - 4rem - 3rem) / 2);
       display: flex;
       flex-direction: column;
       
@@ -165,7 +201,6 @@ app-product-card {
         display: flex;
         flex-direction: column;
         padding: 0;
-        overflow: hidden;
       }
       
       .p-card-content {
@@ -177,7 +212,7 @@ app-product-card {
       }
       
       .p-card-header img {
-        height: 140px;
+        height: 200px;
         object-fit: cover;
         width: 100%;
       }
@@ -216,12 +251,13 @@ app-product-card {
 @media (max-width: 900px) {
   .page-layout {
     flex-direction: column;
-    height: auto;
+    min-height: auto;
   }
   
   app-filters {
     width: 100%;
     height: auto;
+    position: static;
     border-right: none;
     border-bottom: 1px solid #dee2e6;
   }

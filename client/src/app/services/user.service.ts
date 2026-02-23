@@ -19,5 +19,24 @@ export class UserService {
   // 3. פונקציה לניתוק - פשוט מוחקת את הנתונים מהזיכרון!
   logoutUser() {
     localStorage.removeItem('currentUser');
+    localStorage.removeItem('auth_token');
+  }
+
+  // 4. Get current user data
+  getCurrentUser(): any {
+    const userData = localStorage.getItem('currentUser');
+    return userData ? JSON.parse(userData) : null;
+  }
+
+  // 5. Check if user is admin
+  isAdmin(): boolean {
+    const user = this.getCurrentUser();
+    return user?.isAdmin === true;
+  }
+
+  // 6. Get user role
+  getUserRole(): string {
+    const user = this.getCurrentUser();
+    return user?.isAdmin ? 'admin' : 'user';
   }
 }

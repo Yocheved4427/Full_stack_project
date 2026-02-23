@@ -89,5 +89,5 @@ namespace Services
             return _mapper.Map<IEnumerable<User>, IEnumerable<UserDTO>>(await _repository.GetUsers());
             
         }
-    }
+    }   
 }

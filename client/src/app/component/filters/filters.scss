@@ -85,6 +85,12 @@
   }
 }
 
+.pagination-section {
+  padding-top: 1rem;
+  border-top: 1px solid #e9ecef;
+  margin-top: auto;
+}
+
 ::ng-deep {
   .filters-container {
     .p-listbox {
@@ -124,5 +130,58 @@
         }
       }
     }
-  }
+    // Pagination styling in sidebar - compact and professional
+    .pagination-section {
+      .p-paginator {
+        background: transparent;
+        border: none;
+        padding: 0.25rem 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        
+        .p-paginator-pages {
+          display: flex;
+          gap: 0.15rem;
+          align-items: center;
+        }
+        
+        .p-paginator-page,
+        .p-paginator-first,
+        .p-paginator-prev,
+        .p-paginator-next,
+        .p-paginator-last {
+          min-width: 1.75rem;
+          height: 1.75rem;
+          border-radius: 4px;
+          border: 1px solid #dee2e6;
+          background: white;
+          cursor: pointer;
+          transition: all 0.15s ease;
+          font-size: 0.8rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin: 0 0.1rem;
+          
+          &:hover:not(.p-disabled) {
+            background: #f8f9fa;
+            border-color: #667eea;
+            transform: translateY(-1px);
+          }
+          
+          &.p-highlight {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: #667eea;
+            color: white;
+            font-weight: 600;
+          }
+          
+          &.p-disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+          }
+        }
+      }
+    }  }
 }

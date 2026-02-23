@@ -15,7 +15,9 @@ namespace DTOs
      decimal Price,
 
      string MainImageUrl,
-   
+
+     bool IsActive,
+
     List<string> ImageUrls,
 
     List<ProductMonthConfigDTO> MonthConfigs);

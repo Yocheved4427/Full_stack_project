@@ -5,7 +5,7 @@
             <img 
                 [alt]="product.productName" 
                 class="w-full" 
-                [src]="product.mainImageUrl" 
+                [src]="product.mainImageUrl | imageUrl" 
                 style="height: 180px; object-fit: cover;" 
                 onerror="this.src='https://primefaces.org/cdn/primeng/images/card-ng.jpg'" />
         </ng-template>

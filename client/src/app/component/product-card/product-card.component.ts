@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 // 👇 שימי לב: חייב להיות כתוב Module בסוף!
 import { ButtonModule } from 'primeng/button'; 
 import { CardModule } from 'primeng/card';
+import { ImageUrlPipe } from '../../pipes/image-url.pipe';
 
 import { Product } from '../../models/product.model';
 
@@ -11,7 +12,7 @@ import { Product } from '../../models/product.model';
   selector: 'app-product-card',
   standalone: true,
   // 👇 גם כאן: חובה להשתמש במודולים
-  imports: [CommonModule, ButtonModule, CardModule], 
+  imports: [CommonModule, ButtonModule, CardModule, ImageUrlPipe], 
   templateUrl: './product-card.component.html',
   styleUrl: './product-card.component.scss',
 })
