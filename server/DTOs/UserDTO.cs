@@ -27,6 +27,7 @@ namespace DTOs
     public UserDTO() : this(0, string.Empty, string.Empty, string.Empty, string.Empty, false)
     {
     }
+        public string Token { get; set; } = string.Empty;
 
-}
+    }
 };

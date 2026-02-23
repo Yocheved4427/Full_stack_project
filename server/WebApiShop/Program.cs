@@ -1,8 +1,11 @@
+using System.Text;
 using Microsoft.EntityFrameworkCore;
 using NLog.Web;
 using Repositories;
 using Services;
 using WebApiShop.MiddleWare;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -41,6 +44,27 @@ builder.Services.AddCors(options =>
     });
 });
 
+var key = Encoding.ASCII.GetBytes(builder.Configuration["Jwt:Key"]);
+
+// הגדרת מנגנון האימות
+builder.Services.AddAuthentication(x =>
+{
+    x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(x =>
+{
+    x.RequireHttpsMetadata = false;
+    x.SaveToken = true;
+    x.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuerSigningKey = true, // חובה לאמת את החתימה
+        IssuerSigningKey = new SymmetricSecurityKey(key),
+        ValidateIssuer = false,
+        ValidateAudience = false
+    };
+});
+
 var app = builder.Build();
 
 app.UseCors("AllowAngularOrigins");
@@ -63,6 +87,8 @@ app.UseErrorHandling();
 app.UseRating();
 
 app.UseStaticFiles();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 

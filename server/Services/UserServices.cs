@@ -1,7 +1,12 @@
-﻿using Entities;
-using Repositories;
-using DTOs;
+﻿using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 using AutoMapper;
+using DTOs;
+using Entities;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
+using Repositories;
 namespace Services
 {
     public class UserServices : IUserServices
@@ -9,11 +14,13 @@ namespace Services
         private readonly IUserRepository _repository;
         private readonly IPasswordServices _passwordServices;
         private readonly IMapper _mapper;
-        public UserServices(IUserRepository repository, IPasswordServices passwordServices, IMapper mapper)
+        private readonly IConfiguration _configuration;
+        public UserServices(IUserRepository repository, IPasswordServices passwordServices, IMapper mapper, IConfiguration configuration)
         {
             _repository = repository;
             _passwordServices = passwordServices;
             _mapper = mapper;
+            _configuration = configuration;
         }
       
 
@@ -25,8 +32,36 @@ namespace Services
         }
         public async Task<UserDTO?> Login(ExistingUserDTO existingUser)
         {
-            return _mapper.Map<User,UserDTO>(await _repository.Login(existingUser.Email,existingUser.Password));
-            
+            var userEntity = await _repository.Login(existingUser.Email, existingUser.Password);
+
+            if (userEntity == null)
+                return null;
+
+            var userDTO = _mapper.Map<User, UserDTO>(userEntity);
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"]);
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, userDTO.Id.ToString()),
+                new Claim(ClaimTypes.Email, userDTO.Email)
+            };
+            if (userDTO.IsAdmin)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, "Admin"));
+            }
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(claims),
+                Expires = DateTime.UtcNow.AddDays(7),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+            };
+
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+
+            userDTO.Token = tokenHandler.WriteToken(token);
+
+            return userDTO;
+
         }
         public async Task<UserDTO?> Register(UserDTO user)
         {
