@@ -92,14 +92,28 @@ export class SignUp {
       },
       error: (error: any) => {
         console.error("Signup failed:", error);
-        this.errorMessage.set(
-          error.error?.message || "Signup failed. Please try again."
-        );
+        this.errorMessage.set(this.extractErrorMessage(error));
         this.isLoading.set(false);
       },
       complete: () => {
         this.isLoading.set(false);
       },
     });
+  }
+
+  private extractErrorMessage(error: any): string {
+    if (typeof error?.error === 'string' && error.error.trim()) {
+      return error.error;
+    }
+
+    if (error?.error?.message) {
+      return error.error.message;
+    }
+
+    if (error?.message && !error.message.includes('Http failure response')) {
+      return error.message;
+    }
+
+    return 'Signup failed. Please check your password and try again.';
   }
 }

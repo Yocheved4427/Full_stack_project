@@ -76,7 +76,7 @@ export class SignIn {
         console.error('Login failed:', error);
         console.error('Status:', error.status);
         console.error('Response body:', error.error);
-        const msg = error.error?.message || error.statusText || 'Login failed. Please try again.';
+        const msg = this.extractErrorMessage(error, 'Invalid email or password');
         this.errorMessage.set(msg);
         this.isLoading.set(false);
       },
@@ -84,5 +84,21 @@ export class SignIn {
         this.isLoading.set(false);
       }
     });
+  }
+
+  private extractErrorMessage(error: any, defaultMessage: string): string {
+    if (typeof error?.error === 'string' && error.error.trim()) {
+      return error.error;
+    }
+
+    if (error?.error?.message) {
+      return error.error.message;
+    }
+
+    if (error?.message && !error.message.includes('Http failure response')) {
+      return error.message;
+    }
+
+    return defaultMessage;
   }
 }
