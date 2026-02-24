@@ -58,13 +58,41 @@ namespace Repositories
 
         public async Task<List<Order>> GetOrdersByUserId(int userId)
         {
-            return await _context.Orders
+            var orders = await _context.Orders
                 .Include(o => o.OrderItems)
                     .ThenInclude(oi => oi.Product)
                         .ThenInclude(p => p.Images)
                 .Where(o => o.UserId == userId)
                 .OrderByDescending(o => o.OrderDate)
                 .ToListAsync();
+
+            var today = DateOnly.FromDateTime(DateTime.Today);
+            var hasChanges = false;
+
+            foreach (var order in orders)
+            {
+                var hasStarted = order.OrderItems.Any(oi => oi.DepartureDate.HasValue && oi.DepartureDate.Value <= today);
+                var allFinished = order.OrderItems.Any() && order.OrderItems.All(oi => oi.ReturnDate.HasValue && oi.ReturnDate.Value < today);
+
+                var newStatus = allFinished
+                    ? "Completed"
+                    : hasStarted
+                        ? "In Vacation"
+                        : "waiting...";
+
+                if (!string.Equals(order.Status, newStatus, StringComparison.OrdinalIgnoreCase))
+                {
+                    order.Status = newStatus;
+                    hasChanges = true;
+                }
+            }
+
+            if (hasChanges)
+            {
+                await _context.SaveChangesAsync();
+            }
+
+            return orders;
         }
 
     }

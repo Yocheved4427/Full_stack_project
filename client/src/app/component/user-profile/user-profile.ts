@@ -163,10 +163,39 @@ export class UserProfile implements OnInit {
         beginDate: this.getBeginDate(mappedItems),
         endDate: this.getEndDate(mappedItems),
         totalAmount: Number(order.orderSum ?? 0),
-        status: order.status || 'Waiting',
+        status: this.getDisplayStatus(order.status, mappedItems),
         items: mappedItems
       };
     });
+  }
+
+  private getDisplayStatus(rawStatus: string | undefined, items: OrderItem[]): string {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const beginDate = this.getBeginDate(items);
+    const endDate = this.getEndDate(items);
+
+    if (beginDate && endDate) {
+      const begin = new Date(beginDate);
+      const end = new Date(endDate);
+      begin.setHours(0, 0, 0, 0);
+      end.setHours(0, 0, 0, 0);
+
+      if (today < begin) {
+        return 'waiting...';
+      }
+
+      if (today >= begin && today <= end) {
+        return 'In Vacation';
+      }
+
+      if (today > end) {
+        return 'Completed';
+      }
+    }
+
+    return rawStatus || 'waiting...';
   }
 
   private getBeginDate(items: OrderItem[]): Date | null {

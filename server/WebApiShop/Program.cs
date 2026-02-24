@@ -20,6 +20,7 @@ builder.Services.AddScoped<IOrdersServices, OrdersServices>();
 builder.Services.AddScoped<IRatingRepository, RatingRepository>();
 builder.Services.AddScoped<IRatingService, RatingService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddHostedService<OrderStatusUpdaterService>();
 
 builder.Host.UseNLog();
 builder.Services.AddDbContext<ApiShopContext>(option=>option.UseSqlServer ("Data Source=Noa;Initial Catalog=ApiShop;Integrated Security=True;Trust Server Certificate=True"));
