@@ -7,7 +7,7 @@ import { Product } from '../../models/product.model';
 import { ProductFilter } from '../../models/filter.model';
 import { Filters } from '../filters/filters';
 import { Subject } from 'rxjs';
-import { takeUntil, switchMap } from 'rxjs/operators';
+import { takeUntil } from 'rxjs/operators';
 import { ProductQuickViewComponent } from '../product-quick-view/product-quick-view';
 import { CartService } from '../../services/cart.service';
 import { UserService } from '../../services/user.service';

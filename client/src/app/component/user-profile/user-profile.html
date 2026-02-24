@@ -172,17 +172,27 @@
             <ng-template pTemplate="header">
               <tr>
                 <th pSortableColumn="orderId">Order ID</th>
-                <th pSortableColumn="orderDate">Date</th>
-                <th>Items</th>
-                <th pSortableColumn="totalAmount">Total</th>
+                <th>User ID</th>
+                <th>Begin Date</th>
+                <th>End Date</th>
                 <th pSortableColumn="status">Status</th>
+                <th pSortableColumn="totalAmount">Total Price</th>
+                <th>Items</th>
               </tr>
             </ng-template>
             
             <ng-template pTemplate="body" let-order>
               <tr>
                 <td>{{ order.orderId }}</td>
-                <td>{{ order.orderDate | date:'short' }}</td>
+                <td>{{ order.userId }}</td>
+                <td>{{ order.beginDate ? (order.beginDate | date:'mediumDate') : '-' }}</td>
+                <td>{{ order.endDate ? (order.endDate | date:'mediumDate') : '-' }}</td>
+                <td>
+                  <span [class]="'status-badge status-' + order.status.toLowerCase()">
+                    {{ order.status }}
+                  </span>
+                </td>
+                <td>{{ order.totalAmount | currency }}</td>
                 <td>
                   <ul class="order-items-list">
                     <li *ngFor="let item of order.items">
@@ -190,18 +200,12 @@
                     </li>
                   </ul>
                 </td>
-                <td>{{ order.totalAmount | currency }}</td>
-                <td>
-                  <span [class]="'status-badge status-' + order.status.toLowerCase()">
-                    {{ order.status }}
-                  </span>
-                </td>
               </tr>
             </ng-template>
             
             <ng-template pTemplate="emptymessage">
               <tr>
-                <td colspan="5" class="empty-message">
+                <td colspan="7" class="empty-message">
                   <i class="pi pi-inbox"></i>
                   <p>No orders found</p>
                 </td>

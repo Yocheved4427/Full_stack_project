@@ -22,7 +22,7 @@ builder.Services.AddScoped<IRatingService, RatingService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 
 builder.Host.UseNLog();
-builder.Services.AddDbContext<ApiShopContext>(option=>option.UseSqlServer ("Data Source=Yocheved;Initial Catalog=ApiShop;Integrated Security=True;Trust Server Certificate=True"));
+builder.Services.AddDbContext<ApiShopContext>(option=>option.UseSqlServer ("Data Source=Noa;Initial Catalog=ApiShop;Integrated Security=True;Trust Server Certificate=True"));
 // Add services to the container.
 
 builder.Services.AddControllers()
@@ -30,17 +30,6 @@ builder.Services.AddControllers()
     {
         options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
     });
-
-// Configure request size limits for file uploads
-builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(options =>
-{
-    options.MultipartBodyLengthLimit = 104857600; // 100 MB
-});
-
-builder.Services.Configure<Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerOptions>(options =>
-{
-    options.Limits.MaxRequestBodySize = 104857600; // 100 MB
-});
 
 
 builder.Services.AddOpenApi();
@@ -56,7 +45,7 @@ builder.Services.AddCors(options =>
     });
 });
 
-var key = Encoding.ASCII.GetBytes(builder.Configuration["Jwt:Key"]);
+var key = Encoding.ASCII.GetBytes(builder.Configuration["Jwt:Key"]!);
 
 // ����� ������ ������
 builder.Services.AddAuthentication(x =>

@@ -3,6 +3,12 @@
     <h2><i class="pi pi-shopping-cart"></i> Checkout</h2>
   </div>
 
+  <div *ngIf="checkoutError" class="not-logged-in">
+    <i class="pi pi-exclamation-triangle warning-icon"></i>
+    <h3>Checkout Error</h3>
+    <p>{{ checkoutError }}</p>
+  </div>
+
   <div class="dialog-content">
     <!-- Not Logged In Message -->
     <div *ngIf="!isLoggedIn" class="not-logged-in">

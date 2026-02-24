@@ -27,6 +27,13 @@ namespace WebApiShop.Controllers
             return NotFound();
         }
 
+        [HttpGet("user/{userId}")]
+        public async Task<ActionResult<List<OrderDTO>>> GetOrdersByUserId(int userId)
+        {
+            var orders = await _ordersServices.GetOrdersByUserId(userId);
+            return Ok(orders);
+        }
+
         [HttpPost]
        public async Task<ActionResult<OrderDTO>> Post([FromBody] OrderDTO newOrder)
         {
@@ -35,6 +42,11 @@ namespace WebApiShop.Controllers
             
             try
             {
+                if (newOrder.UserId <= 0)
+                {
+                    return BadRequest(new { message = "Valid userId is required" });
+                }
+
                 Console.WriteLine($"User ID: {newOrder.UserId}");
                 Console.WriteLine($"Order Date: {newOrder.OrderDate}");
                 Console.WriteLine($"Order Sum: {newOrder.OrderSum}");
@@ -70,13 +82,6 @@ namespace WebApiShop.Controllers
                 }
                 return StatusCode(500, new { error = ex.Message, innerError = ex.InnerException?.Message, stackTrace = ex.StackTrace });
             }
-        }
-
-        [HttpGet("user/{userId}")]
-        public async Task<ActionResult<List<OrderDTO>>> GetUserOrders(int userId)
-        {
-            var orders = await _ordersServices.GetOrdersByUserId(userId);
-            return Ok(orders);
         }
 
     }

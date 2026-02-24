@@ -15,16 +15,45 @@ import { ApiService } from '../../services/api.service';
 
 interface Order {
   orderId: number;
+  userId: number;
   orderDate: Date;
+  beginDate: Date | null;
+  endDate: Date | null;
   totalAmount: number;
   status: string;
   items: OrderItem[];
 }
 
 interface OrderItem {
+  productId: number;
   productName: string;
+  imageUrl: string;
   quantity: number;
-  price: number;
+  departureDate: Date | null;
+  returnDate: Date | null;
+  nightsCount: number;
+  unitPrice: number;
+  lineTotal: number;
+}
+
+interface ApiOrderItem {
+  productId?: number;
+  productName?: string;
+  imageUrl?: string;
+  quantity?: number;
+  departureDate?: string;
+  returnDate?: string;
+  nightsCount?: number;
+  pricePerUnit?: number;
+}
+
+interface ApiOrder {
+  orderId?: number;
+  userId?: number;
+  orderDate?: string;
+  orderSum?: number;
+  status?: string;
+  orderItems?: ApiOrderItem[];
 }
 
 @Component({
@@ -94,8 +123,8 @@ export class UserProfile implements OnInit {
     
     if (user?.id) {
       this.apiService.getUserOrders(user.id).subscribe({
-        next: (orders: any[]) => {
-          this.orders.set(orders);
+        next: (orders: ApiOrder[]) => {
+          this.orders.set(this.mapOrdersForView(orders));
           this.isLoadingOrders.set(false);
         },
         error: (error) => {
@@ -107,6 +136,55 @@ export class UserProfile implements OnInit {
     } else {
       this.isLoadingOrders.set(false);
     }
+  }
+
+  private mapOrdersForView(orders: ApiOrder[]): Order[] {
+    return (orders || []).map((order) => {
+      const mappedItems: OrderItem[] = (order.orderItems || []).map((item) => {
+        const quantity = Number(item.quantity ?? 0);
+        const unitPrice = Number(item.pricePerUnit ?? 0);
+        return {
+          productId: Number(item.productId ?? 0),
+          productName: item.productName || 'Product',
+          imageUrl: item.imageUrl || '',
+          quantity,
+          departureDate: item.departureDate ? new Date(item.departureDate) : null,
+          returnDate: item.returnDate ? new Date(item.returnDate) : null,
+          nightsCount: Number(item.nightsCount ?? 0),
+          unitPrice,
+          lineTotal: quantity * unitPrice
+        };
+      });
+
+      return {
+        orderId: Number(order.orderId ?? 0),
+        userId: Number(order.userId ?? 0),
+        orderDate: order.orderDate ? new Date(order.orderDate) : new Date(),
+        beginDate: this.getBeginDate(mappedItems),
+        endDate: this.getEndDate(mappedItems),
+        totalAmount: Number(order.orderSum ?? 0),
+        status: order.status || 'Waiting',
+        items: mappedItems
+      };
+    });
+  }
+
+  private getBeginDate(items: OrderItem[]): Date | null {
+    const dates = items
+      .map(item => item.departureDate)
+      .filter((date): date is Date => date !== null)
+      .sort((a, b) => a.getTime() - b.getTime());
+
+    return dates.length > 0 ? dates[0] : null;
+  }
+
+  private getEndDate(items: OrderItem[]): Date | null {
+    const dates = items
+      .map(item => item.returnDate)
+      .filter((date): date is Date => date !== null)
+      .sort((a, b) => b.getTime() - a.getTime());
+
+    return dates.length > 0 ? dates[0] : null;
   }
 
   saveProfile(): void {
