@@ -38,14 +38,16 @@ export class SignIn {
   login(): void {
     
     this.errorMessage.set('');
+    const email = this.email().trim();
+    const password = this.password().trim();
     
-    if (!this.email() || !this.password()) {
+    if (!email || !password) {
       this.errorMessage.set('Please enter email and password');
       return;
     }
 
     this.isLoading.set(true);
-    this.apiService.login(this.email(), this.password()).subscribe({
+    this.apiService.login(email, password).subscribe({
       next: (response: any) => {
         console.log('Login successful:', response);
         

@@ -54,7 +54,8 @@ export class ApiService {
   }
 
   updateUser(userData: any): Observable<any> {
-    return this.http.put<any>(`${this.apiUrl}/Users/${userData.id}`, userData);
+    const resolvedUserId = userData?.id ?? userData?.Id ?? userData?.userId;
+    return this.http.put<any>(`${this.apiUrl}/Users/${resolvedUserId}`, userData);
   }
 
   changePassword(passwordData: any): Observable<any> {

@@ -73,7 +73,28 @@ namespace WebApiShop.Controllers
             bool success = await _userServices.Update(id, updateUser);
             if (!success)
                 return BadRequest();
-            return NoContent();
+            return Ok(updateUser);
+        }
+
+        [HttpPost("change-password")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDTO changePassword)
+        {
+            if (changePassword.UserId <= 0)
+                return BadRequest(new { message = "Invalid user id" });
+
+            if (string.IsNullOrWhiteSpace(changePassword.CurrentPassword) || string.IsNullOrWhiteSpace(changePassword.NewPassword))
+                return BadRequest(new { message = "Current password and new password are required" });
+
+            var errorMessage = await _userServices.ChangePassword(
+                changePassword.UserId,
+                changePassword.CurrentPassword,
+                changePassword.NewPassword
+            );
+
+            if (errorMessage != null)
+                return BadRequest(new { message = errorMessage });
+
+            return Ok(new { message = "Password changed successfully" });
         }
 
 
