@@ -23,7 +23,21 @@ namespace Repositories
         }
         public async Task<User?> Login(string email, string password)
         {
-            return await _context.Users.Include(user=>user.Orders).FirstOrDefaultAsync(user => user.Email == email && user.Password == password);
+            if (string.IsNullOrWhiteSpace(email))
+                return null;
+
+            var normalizedEmail = email.Trim().ToLower();
+            var incomingPassword = password?.Trim() ?? string.Empty;
+
+            var user = await _context.Users
+                .Include(user => user.Orders)
+                .FirstOrDefaultAsync(user => user.Email.ToLower() == normalizedEmail);
+
+            if (user == null)
+                return null;
+
+            var storedPassword = user.Password?.Trim() ?? string.Empty;
+            return storedPassword == incomingPassword ? user : null;
 
         }
         public async Task<User?> Register(User user)

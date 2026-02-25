@@ -32,7 +32,12 @@ namespace Services
         }
         public async Task<UserDTO?> Login(ExistingUserDTO existingUser)
         {
-            var userEntity = await _repository.Login(existingUser.Email, existingUser.Password);
+            if (existingUser == null)
+                return null;
+
+            var normalizedEmail = existingUser.Email?.Trim() ?? string.Empty;
+            var normalizedPassword = existingUser.Password?.Trim() ?? string.Empty;
+            var userEntity = await _repository.Login(normalizedEmail, normalizedPassword);
 
             if (userEntity == null)
                 return null;
