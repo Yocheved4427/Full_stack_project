@@ -80,12 +80,44 @@ namespace Services
         }
         public async Task<bool> Update(int id, UserDTO updateUser)
         {
-            int passScore = _passwordServices.PasswordScore(updateUser.Password);
-            if (passScore < 2)
+            var existingUser = await _repository.GetUserById(id);
+            if (existingUser == null)
                 return false;
-            User user = _mapper.Map<User>(updateUser);
-            await _repository.Update(id, user);
+
+            existingUser.FirstName = updateUser.FirstName;
+            existingUser.LastName = updateUser.LastName;
+            existingUser.Email = updateUser.Email;
+            existingUser.IsAdmin = updateUser.IsAdmin;
+
+            if (!string.IsNullOrWhiteSpace(updateUser.Password))
+            {
+                int passScore = _passwordServices.PasswordScore(updateUser.Password);
+                if (passScore < 2)
+                    return false;
+
+                existingUser.Password = updateUser.Password;
+            }
+
+            await _repository.Update(id, existingUser);
             return true;
+        }
+
+        public async Task<string?> ChangePassword(int userId, string currentPassword, string newPassword)
+        {
+            var user = await _repository.GetUserById(userId);
+            if (user == null)
+                return "User not found";
+
+            if (!string.Equals(user.Password?.Trim(), currentPassword?.Trim(), StringComparison.Ordinal))
+                return "Current password is incorrect";
+
+            int passScore = _passwordServices.PasswordScore(newPassword);
+            if (passScore < 2)
+                return "Password must be at least 8 characters and include a number and uppercase letter";
+
+            user.Password = newPassword;
+            await _repository.Update(userId, user);
+            return null;
         }
         
 

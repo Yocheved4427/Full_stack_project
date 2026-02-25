@@ -119,10 +119,10 @@ export class UserProfile implements OnInit {
 
   loadOrderHistory(): void {
     this.isLoadingOrders.set(true);
-    const user = this.userService.getCurrentUser();
+    const resolvedUserId = this.getCurrentUserId();
     
-    if (user?.id) {
-      this.apiService.getUserOrders(user.id).subscribe({
+    if (resolvedUserId) {
+      this.apiService.getUserOrders(resolvedUserId).subscribe({
         next: (orders: ApiOrder[]) => {
           this.orders.set(this.mapOrdersForView(orders));
           this.isLoadingOrders.set(false);
@@ -239,12 +239,25 @@ export class UserProfile implements OnInit {
 
     this.isSavingProfile.set(true);
     const user = this.userService.getCurrentUser();
+    const resolvedUserId = this.getCurrentUserId();
+
+    if (!resolvedUserId) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'User not found. Please sign in again.'
+      });
+      this.isSavingProfile.set(false);
+      return;
+    }
 
     const updateData = {
-      id: user?.id,
+      id: resolvedUserId,
       firstName: this.firstName(),
       lastName: this.lastName(),
-      email: this.email()
+      email: this.email(),
+      isAdmin: user?.isAdmin === true,
+      password: ''
     };
 
     this.apiService.updateUser(updateData).subscribe({
@@ -299,9 +312,18 @@ export class UserProfile implements OnInit {
       return;
     }
 
-    const user = this.userService.getCurrentUser();
+    const resolvedUserId = this.getCurrentUserId();
+    if (!resolvedUserId) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'User not found. Please sign in again.'
+      });
+      return;
+    }
+
     const passwordData = {
-      userId: user?.id,
+      userId: resolvedUserId,
       currentPassword: this.currentPassword(),
       newPassword: this.newPassword()
     };
@@ -335,5 +357,11 @@ export class UserProfile implements OnInit {
 
   goBack(): void {
     this.router.navigate(['/products']);
+  }
+
+  private getCurrentUserId(): number | null {
+    const user = this.userService.getCurrentUser();
+    const resolvedId = Number(user?.id ?? user?.Id ?? user?.userId ?? 0);
+    return resolvedId > 0 ? resolvedId : null;
   }
 }
