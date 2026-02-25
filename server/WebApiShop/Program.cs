@@ -1,11 +1,13 @@
-using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using NLog.Web;
 using Repositories;
 using Services;
+
+using System.Text;
 using WebApiShop.MiddleWare;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
+
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -23,7 +25,8 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddHostedService<OrderStatusUpdaterService>();
 
 builder.Host.UseNLog();
-builder.Services.AddDbContext<ApiShopContext>(option=>option.UseSqlServer ("Data Source=Noa;Initial Catalog=ApiShop;Integrated Security=True;Trust Server Certificate=True"));
+
+builder.Services.AddDbContext<ApiShopContext>(option=>option.UseSqlServer ("Data Source=Yocheved;Initial Catalog=ApiShop;Integrated Security=True;Trust Server Certificate=True"));
 // Add services to the container.
 
 builder.Services.AddControllers()
@@ -92,8 +95,8 @@ app.UseStaticFiles();
 
 app.UseAuthentication();
 
-app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();
+
+

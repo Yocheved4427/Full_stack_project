@@ -144,7 +144,7 @@ export class ProductsPageComponent implements OnInit, OnDestroy {
     this.updatePaginatedProducts();
   }
 
-  // 👇 פונקציה לפתיחת ה-Quick View
+
   openQuickView(product: Product) {
     this.selectedProduct = product;
     this.productKey = product.productId;

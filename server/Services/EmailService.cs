@@ -1,5 +1,6 @@
-using System.Net;
-using System.Net.Mail;
+using MailKit.Net.Smtp;
+using MailKit.Security;
+using MimeKit;
 using Microsoft.Extensions.Configuration;
 
 namespace Services
@@ -30,44 +31,27 @@ namespace Services
                 var username = emailSettings["Username"];
                 var password = emailSettings["Password"];
 
-                // For demo purposes, if no credentials are configured, we'll just log and return success
-                if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
+                var message = new MimeMessage();
+                message.From.Add(new MailboxAddress(senderName, senderEmail));
+                message.To.Add(new MailboxAddress(customerName, toEmail));
+                message.Subject = $"Order Confirmation - {orderNumber}";
+                message.Body = new TextPart("html")
                 {
-                    Console.WriteLine($"[EMAIL SIMULATION] Order Confirmation Email");
-                    Console.WriteLine($"To: {toEmail}");
-                    Console.WriteLine($"Customer: {customerName}");
-                    Console.WriteLine($"Order #: {orderNumber}");
-                    Console.WriteLine($"Total: ${orderTotal}");
-                    Console.WriteLine($"Items: {orderItems}");
-                    Console.WriteLine("Note: Configure SMTP credentials in appsettings.json to send real emails");
-                    return;
-                }
-
-                // Create email message
-                var mailMessage = new MailMessage
-                {
-                    From = new MailAddress(senderEmail, senderName),
-                    Subject = $"Order Confirmation - {orderNumber}",
-                    Body = GenerateEmailBody(customerName, orderNumber, orderTotal, orderItems),
-                    IsBodyHtml = true
-                };
-                mailMessage.To.Add(toEmail);
-
-                // Configure SMTP client
-                using var smtpClient = new SmtpClient(smtpServer, smtpPort)
-                {
-                    Credentials = new NetworkCredential(username, password),
-                    EnableSsl = true
+                    Text = GenerateEmailBody(customerName, orderNumber, orderTotal, orderItems)
                 };
 
-                // Send email
-                await smtpClient.SendMailAsync(mailMessage);
-                Console.WriteLine($"Order confirmation email sent successfully to {toEmail}");
+                using var client = new SmtpClient();
+                await client.ConnectAsync(smtpServer, smtpPort, SecureSocketOptions.StartTls);
+                await client.AuthenticateAsync(username, password);
+                await client.SendAsync(message);
+                await client.DisconnectAsync(true);
+
+                Console.WriteLine($"Email sent successfully to {toEmail}");
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Failed to send email: {ex.Message}");
-                // Log the error but don't throw - we don't want email failures to break the order process
+                throw;
             }
         }
 
@@ -95,7 +79,6 @@ namespace Services
                         <div class='content'>
                             <p>Dear {customerName},</p>
                             <p>Thank you for choosing Vacation Shop! We're excited to confirm your order.</p>
-                            
                             <div class='order-details'>
                                 <h2>Order Details</h2>
                                 <p><strong>Order Number:</strong> {orderNumber}</p>
@@ -105,15 +88,11 @@ namespace Services
                                 <h3>Items:</h3>
                                 <p>{orderItems}</p>
                             </div>
-                            
                             <p>We will send you another email when your booking is confirmed.</p>
-                            <p>If you have any questions about your order, please contact our customer support.</p>
-                            
                             <p>Best regards,<br/>The Vacation Shop Team</p>
                         </div>
                         <div class='footer'>
                             <p>© 2026 Vacation Shop. All rights reserved.</p>
-                            <p>This is an automated message, please do not reply.</p>
                         </div>
                     </div>
                 </body>

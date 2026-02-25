@@ -94,6 +94,25 @@ namespace Repositories
 
             return orders;
         }
+        public async Task<List<Order>> GetAllOrders()
+        {
+          
+           
+            return await _context.Orders
+                .AsNoTracking()
+                .Include(o => o.User)
+                .OrderByDescending(o => o.OrderDate)
+                .ToListAsync();
+        }
+        public async Task<List<Order>> GetAllOrdersForAdmin()
+        {
+            return await _context.Orders
+                .AsNoTracking() 
+                .Include(o => o.User)
+                .Include(o => o.OrderItems) 
+                .OrderByDescending(o => o.OrderDate)
+                .ToListAsync();
+        }
 
     }
 }

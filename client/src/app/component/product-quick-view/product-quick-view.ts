@@ -60,24 +60,21 @@ export class ProductQuickViewComponent implements OnChanges {
     private cartService: CartService,
     private router: Router
   ) {}  ngOnChanges(changes: SimpleChanges) {
-    // Rebuild images when product changes OR when dialog becomes visible
+    
     if ((changes['product'] && changes['product'].currentValue) || 
         (changes['visible'] && changes['visible'].currentValue && this.product)) {
       
-      // IMPORTANT: Reset active index to 0 to show main image first
+      
       this.activeIndex = 0;
       
-      // IMPORTANT: Create a NEW array (don't just clear it)
+     
       this.images = [];
       
-      // Load full product details with month configs when dialog opens
+      
       if (changes['visible']?.currentValue && this.product?.productId) {
         this.loadProductDetails();
       }
       
-      // imageUrls contains ALL images from the database
-      // mainImageUrl is the one where IsMain = 1
-      // We want to show mainImageUrl first, then the other images
       
       if (this.product.imageUrls && this.product.imageUrls.length > 0) {
         // First, add the main image
@@ -141,7 +138,7 @@ export class ProductQuickViewComponent implements OnChanges {
     
     this.monthConfigs.forEach(config => {
       if (config.isAvailable === false) {
-        const monthIndex = config.monthNumber - 1; // JavaScript months are 0-based
+        const monthIndex = config.monthNumber - 1; 
         
         // Disable all days in this month for current and next year
         [currentYear, nextYear].forEach(year => {
@@ -162,7 +159,7 @@ export class ProductQuickViewComponent implements OnChanges {
       return;
     }
 
-    // Check if the selected dates fall within any peak period months
+    
     const startMonth = this.startDate.getMonth() + 1;
     const endMonth = this.endDate.getMonth() + 1;
     

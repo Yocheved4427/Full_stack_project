@@ -238,7 +238,7 @@ export class CheckoutDialog implements OnInit {
         const emailData = {
           to: currentUser.email,
           subject: 'Thank You for Your Purchase - Order Confirmation',
-          orderNumber: order.orderId || this.generateOrderNumber(),
+          orderNumber: (order.orderId || this.generateOrderNumber()).toString(),
           customerName: `${currentUser.firstName} ${currentUser.lastName}`,
           orderDate: new Date(),
           orderTotal: this.totalPrice,

@@ -47,11 +47,6 @@ export class CartService {
     return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
   }
 
-  // --- לוגיקת חישוב המחירים המרכזית ---
-
-  /**
-   * מחשבת מחיר ללילה בהתאם לעונת שיא
-   */
   getEffectivePricePerNight(startDate: Date, basePrice: number, monthConfigs: any[]): number {
     if (!startDate || !monthConfigs || monthConfigs.length === 0) {
       return basePrice;
@@ -66,9 +61,7 @@ export class CartService {
     return config ? config.specialPrice : basePrice;
   }
 
-  /**
-   * מחשבת את המחיר הכולל עבור הפריט בעגלה
-   */
+ 
   calculateTotalAmount(startDate: Date, endDate: Date, basePrice: number, participants: number, monthConfigs: any[]): number {
     if (!startDate || !endDate) return 0;
     

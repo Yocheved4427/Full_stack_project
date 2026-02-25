@@ -33,6 +33,12 @@ namespace WebApiShop.Controllers
             var orders = await _ordersServices.GetOrdersByUserId(userId);
             return Ok(orders);
         }
+        [HttpGet]
+        public async Task<ActionResult<List<OrderDTO>>> GetAll()
+        {
+            var orders = await _ordersServices.GetAllOrders();
+            return Ok(orders);
+        }
 
         [HttpPost]
        public async Task<ActionResult<OrderDTO>> Post([FromBody] OrderDTO newOrder)
@@ -82,6 +88,7 @@ namespace WebApiShop.Controllers
                 }
                 return StatusCode(500, new { error = ex.Message, innerError = ex.InnerException?.Message, stackTrace = ex.StackTrace });
             }
+
         }
 
     }

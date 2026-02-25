@@ -1,6 +1,30 @@
-<div class="admin-orders-container">
-  <div class="card">
-    <h2>Orders</h2>
-    <p>Orders page is ready. You are no longer redirected to home.</p>
+<div class="p-4">
+  <div class="card shadow-sm border-round-xl p-4 bg-white">
+    <h2 class="text-3xl font-bold mb-4">All Orders</h2>
+    
+    <p-table [value]="orders()" [loading]="isLoading()" [paginator]="true" [rows]="10" responsiveLayout="scroll" class="w-full">
+      <ng-template pTemplate="header">
+        <tr>
+          <th class="bg-gray-100">Order ID</th>
+          <th class="bg-gray-100">User ID</th>
+          <th class="bg-gray-100">Order Date</th>
+          <th class="bg-gray-100">Total Sum</th>
+          <th class="bg-gray-100">Status</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-order>
+        <tr class="hover:bg-gray-50">
+          <td class="font-semibold">#{{order.orderId}}</td>
+          <td>{{order.userId}}</td>
+          <td>{{order.orderDate | date:'dd/MM/yyyy'}}</td>
+          <td class="text-primary font-bold">${{order.orderSum}}</td>
+          <td>
+            <span class="p-badge" [ngClass]="{'p-badge-warning': order.status === 'Waiting', 'p-badge-success': order.status === 'Completed'}">
+              {{order.status}}
+            </span>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
   </div>
 </div>
