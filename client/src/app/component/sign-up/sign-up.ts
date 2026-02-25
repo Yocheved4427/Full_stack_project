@@ -83,7 +83,7 @@ export class SignUp {
       password: this.password(),
     };
 
-    // Call your API registration endpoint
+    // Call API registration endpoint
     this.apiService.register(signupData).subscribe({
       next: (response: any) => {
         console.log("Signup successful:", response);

@@ -63,5 +63,10 @@ namespace Services
             var orders = await _orders.GetOrdersByUserId(userId);
             return _mapper.Map<List<Order>, List<OrderDTO>>(orders);
         }
+        public async Task<List<OrderDTO>> GetAllOrders()
+        {
+            var orders = await _orders.GetAllOrders();
+            return _mapper.Map<List<Order>, List<OrderDTO>>(orders);
+        }
     }
 }

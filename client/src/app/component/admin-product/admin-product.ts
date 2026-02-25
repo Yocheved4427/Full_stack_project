@@ -329,28 +329,22 @@ export class AdminProduct implements OnInit, OnChanges {
   getImageUrl(url: string): string {
     if (!url) return '';
     
-    // If URL starts with http/https, return as-is (absolute URL)
     if (url.startsWith('http://') || url.startsWith('https://')) {
       return url;
     }
     
-    // If it's an old GUID-based path saved in server's wwwroot
+    
     if (url.includes('images/products/')) {
       return `https://localhost:44386/${url}`;
     }
     
-    // If path starts with "images/", it's from client/public folder
-    // Add leading slash and ensure it's served from Angular dev server
+   
     if (url.startsWith('images/')) {
-      // Angular serves public folder contents at root level
-      // Add leading slash for absolute path from root
+      
       return '/' + url;
     }
     
-    // If it's just a filename without path, it's from old data - try to construct path
-    // This handles cases like "London England1.png"
-    // We'll need category name and product name to construct full path
-    // For now, return error image placeholder or the url as-is and let browser 404
+    
     console.warn('Invalid image path format:', url);
     return url;
   }
@@ -361,7 +355,7 @@ export class AdminProduct implements OnInit, OnChanges {
   }
 
   saveProduct(): void {
-    // Validate form
+   
     if (!this.productName || !this.categoryId || !this.price) {
       this.messageService.add({
         severity: 'error',
@@ -380,7 +374,6 @@ export class AdminProduct implements OnInit, OnChanges {
       return;
     }
 
-    // Prepare product data
     const mainImage = this.images.find(img => img.isMain);
     const productData = {
       productId: this.product?.productId || 0,

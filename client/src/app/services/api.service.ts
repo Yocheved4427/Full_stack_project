@@ -60,4 +60,7 @@ export class ApiService {
   changePassword(passwordData: any): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/Users/change-password`, passwordData);
   }
+  getAllOrders(): Observable<any[]> {
+  return this.http.get<any[]>(`${this.apiUrl}/Orders`);
+}
 }

@@ -19,14 +19,13 @@ import { Product } from '../../models/product.model';
 export class ProductCard {
   @Input() product!: Product; 
   
-  // 👇 זה מה שהוספנו: האירוע שמשדר החוצה
+ 
   @Output() addToCartClick = new EventEmitter<Product>();
 
   getSafeUrl(url: string): string {
     return encodeURI(url);
   }
 
-  // 👇 הפונקציה שהכפתור ב-HTML יפעיל
   onAddToCart() {
     this.addToCartClick.emit(this.product);
   }

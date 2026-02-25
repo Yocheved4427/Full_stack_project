@@ -7,5 +7,6 @@ namespace Services
         Task<OrderDTO?> GetOrderById(int id);
         Task<OrderDTO> AddOrder(OrderDTO order);
         Task<List<OrderDTO>> GetOrdersByUserId(int userId);
+        Task<List<OrderDTO>> GetAllOrders();
     }
 }
