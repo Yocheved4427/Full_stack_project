@@ -1,0 +1,78 @@
+[
+  {
+    "id": "product_1",
+    "text": "Bansko Bulgaria. Price: $450. A popular ski resort in the Pirin Mountains of Bulgaria, offering great winter sports and cultural heritage. Peak season (Jan–Feb): $650. Not available May–Oct."
+  },
+  {
+    "id": "product_2",
+    "text": "Budapest Hungary. Price: $400. The city of baths and bridges, spectacular architecture on the Danube. Peak season (Jul–Aug): $600, December: $550."
+  },
+  {
+    "id": "product_3",
+    "text": "Madonna di Campiglio Italy. Price: $1000. Skiing in the breathtaking views of the Dolomites."
+  },
+  {
+    "id": "product_4",
+    "text": "St. Moritz Switzerland. Price: $1650. A luxurious ski vacation in an exclusive atmosphere in the Alps."
+  },
+  {
+    "id": "product_5",
+    "text": "Tromsø Norway. Price: $950. A breathtaking Arctic city in Norway, famous for its stunning fjords and as a premier destination for viewing the Northern Lights."
+  },
+  {
+    "id": "product_6",
+    "text": "Val Thorens France. Price: $875. Europe's highest ski resort, famous for its exceptional snow and vast alpine slopes in the French Alps."
+  },
+  {
+    "id": "product_8",
+    "text": "London England. Price: $1600. Experience the timeless elegance of London: a perfect blend of royal heritage and modern sophistication."
+  },
+  {
+    "id": "product_9",
+    "text": "New York USA. Price: $1400. New York City: the vibrant heart of the world, where iconic skylines meet endless energy and architectural wonder."
+  },
+  {
+    "id": "product_10",
+    "text": "Prague Czech Republic. Price: $600. A fairytale city of Gothic spires and cobblestone charm, where history comes to life on every corner. Peak season (Jun–Aug): $1200, December: $1500."
+  },
+  {
+    "id": "product_11",
+    "text": "Rome Italy. Price: $725. An eternal city where ancient majesty meets timeless culture in every breathtaking street. Peak season (Apr–May, Sep–Oct): $1800–$1850, summer: $1500."
+  },
+  {
+    "id": "product_12",
+    "text": "Vienna Austria. Price: $600. A majestic capital of imperial grandeur, world-class music, and refined architectural beauty. Peak season (Jun–Aug): $1100, December: $1400."
+  },
+  {
+    "id": "product_13",
+    "text": "Black Forest Germany. Price: $550. A serene landscape of mist-covered mountains, towering evergreens, and timeless Alpine charm. Winter (Jan–Feb, Dec): $1200, summer (Jun–Aug): $1050."
+  },
+  {
+    "id": "product_14",
+    "text": "Canadian Rockies Canada. Price: $780. A majestic wilderness of turquoise lakes, snow-capped peaks, and breathtaking natural wonders. Winter (Jan–Feb): $1200, summer (Jul–Aug): $1650."
+  },
+  {
+    "id": "product_15",
+    "text": "Interlaken Switzerland. Price: $925. A majestic gateway between emerald lakes and soaring Alpine peaks, where natural beauty and adventure meet."
+  },
+  {
+    "id": "product_16",
+    "text": "Kyoto Japan. Price: $850. A serene tapestry of ancient temples, traditional gardens, and the timeless elegance of Japanese heritage. Cherry blossom season (Mar–Apr): $1600–$1850, autumn (Nov): $1700."
+  },
+  {
+    "id": "product_17",
+    "text": "Plitvice Lakes Croatia. Price: $450. A breathtaking paradise of cascading waterfalls, crystal-clear turquoise lakes, and lush emerald forests. Peak season (Jun–Aug): $850–$950."
+  },
+  {
+    "id": "product_18",
+    "text": "Dubai United Arab Emirates. Price: $950. A futuristic desert oasis of soaring skyscrapers, luxury, and architectural marvels in the heart of the Middle East."
+  },
+  {
+    "id": "product_19",
+    "text": "Maldives. Price: $1450. A pristine paradise of crystalline turquoise waters, vibrant coral reefs, and serene white-sand islands."
+  },
+  {
+    "id": "product_20",
+    "text": "Paphos Cyprus. Price: $420. A coastal treasure of ancient heritage, azure Mediterranean waters, and sun-drenched landscapes. Peak season (Jun–Oct): $500–$950."
+  }
+]
