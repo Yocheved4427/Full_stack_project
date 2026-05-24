@@ -1,0 +1,67 @@
+{
+  "store": "Dreams Escapes",
+  "last_updated": "2026-05-24",
+
+  "booking": {
+    "deposit_percent": 20,
+    "deposit_note": "A 20% deposit is required to confirm a booking. The remaining balance is due 30 days before departure.",
+    "minimum_advance_days": 7,
+    "minimum_advance_note": "Bookings must be made at least 7 days before the departure date.",
+    "group_minimum": 1,
+    "group_maximum": 20,
+    "group_note": "Packages are available for 1–20 travellers. Groups larger than 20 require a custom quote."
+  },
+
+  "cancellation": {
+    "tiers": [
+      { "days_before_departure": 30, "refund_percent": 100, "label": "Full refund" },
+      { "days_before_departure": 14, "refund_percent": 50,  "label": "50% refund" },
+      { "days_before_departure": 7,  "refund_percent": 25,  "label": "25% refund" },
+      { "days_before_departure": 0,  "refund_percent": 0,   "label": "No refund" }
+    ],
+    "note": "Cancellation must be submitted in writing via email. Refunds are processed within 10 business days."
+  },
+
+  "payment": {
+    "accepted_methods": ["Credit card", "Debit card", "Bank transfer"],
+    "currencies": ["USD", "EUR", "GBP"],
+    "instalment_available": true,
+    "instalment_note": "Instalment plans are available for packages over $800. Contact us to arrange."
+  },
+
+  "changes": {
+    "date_change_fee_usd": 50,
+    "date_change_note": "Date changes are permitted up to 14 days before departure for a $50 fee per person, subject to availability.",
+    "destination_change_note": "Destination changes are treated as a cancellation and re-booking."
+  },
+
+  "inclusions": {
+    "always_included": ["Return flights", "Airport transfers", "Accommodation (hotel or resort)", "Welcome pack"],
+    "sometimes_included": ["Guided tours (see individual package)", "Breakfast (see individual package)", "Travel insurance (optional add-on)"],
+    "never_included": ["Visa fees", "Personal expenses", "Tips and gratuities", "Meals not specified in the package"]
+  },
+
+  "age_policy": {
+    "minimum_age_unaccompanied": 18,
+    "children_note": "Children under 18 must travel with an adult. Children under 2 travel free (no seat). Ages 2–11 receive a 15% discount on the package price.",
+    "senior_note": "No age maximum. Travellers over 70 are advised to declare any pre-existing medical conditions at booking."
+  },
+
+  "travel_insurance": {
+    "required": false,
+    "recommended": true,
+    "note": "Travel insurance is strongly recommended but not mandatory. Dreams Escapes can arrange comprehensive cover as an add-on at checkout."
+  },
+
+  "complaints": {
+    "contact_email": "support@dreamsescapes.com",
+    "response_time_hours": 48,
+    "note": "All complaints are acknowledged within 48 hours and resolved within 14 business days."
+  },
+
+  "loyalty": {
+    "program_name": "Escapes Rewards",
+    "points_per_dollar": 1,
+    "redemption_note": "Earn 1 point per $1 spent. 500 points = $10 discount on your next booking."
+  }
+}
