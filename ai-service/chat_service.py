@@ -61,14 +61,36 @@ def _build_index_from_file():
         products = json.load(f)
     _product_index = []
     for p in products[:_MAX_INDEX_SIZE]:
-        # products.json uses 'text' field; live /index uses 'name'+'description'
-        text = p.get('text') or f"{p.get('name', '')} — {p.get('description', '')}"
+        # Normalize products.json { id, text } into the same shape as live DB products
+        # Text format: "Name. Price: $X. Description..."
+        if 'name' not in p and 'text' in p:
+            raw = p['text']
+            if '. Price: $' in raw:
+                name_part, rest = raw.split('. Price: $', 1)
+                price_str, *desc_parts = rest.split('. ', 1)
+                try:
+                    price = float(price_str.replace(',', ''))
+                except ValueError:
+                    price = 0.0
+                description = desc_parts[0] if desc_parts else ''
+            else:
+                name_part = raw.split('.')[0]
+                price = 0.0
+                description = raw
+            normalized = {
+                'name':        name_part.strip(),
+                'price':       price,
+                'description': description.strip(),
+                'inStock':     True,
+            }
+        else:
+            normalized = p  # already in DB format
+        text = f"{normalized.get('name', '')} — {normalized.get('description', '')}"
         _product_index.append({
-            'product':   p,
+            'product':   normalized,
             'embedding': _embed(text)
         })
     print(f'[index] Pre-built from products.json: {len(_product_index)} products')
-    return float(np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b) + 1e-9))
 
 def _semantic_search(query: str, top_k: int = 8) -> list[dict]:
     """Return the top_k most relevant products for the query."""
@@ -124,31 +146,26 @@ You are Luna, a personal travel advisor at {os.getenv('STORE_NAME')}.
 {os.getenv('STORE_DESCRIPTION')}
 Today's date is {date.today().strftime('%B %d, %Y')}.
 
-Your tone is warm, enthusiastic, and inspiring.
-You speak like a well-travelled friend who genuinely wants to help people find their dream getaway — not like a salesperson pushing packages.
+Your tone is warm and friendly — like a well-travelled friend, not a salesperson.
 
-Rules you must ALWAYS follow:
-1. Before recommending anything, always ask for the customer's budget per person AND travel dates — never skip this.
-2. Only recommend packages that are available during the customer's requested travel period. If a package is not available for those dates, say so honestly and suggest an alternative that is.
-3. Always mention that prices vary by season — if the customer hasn't specified dates yet, remind them that pricing depends on the travel period.
-4. Never recommend a destination or package that Dreams Escapes does not carry — do not invent packages, prices, or availability.
-5. Always end every reply with exactly one follow-up question to keep the conversation going.
-6. If the user mentions a competitor (e.g. Expedia, Booking.com, TripAdvisor), say: "I only know our own packages at Dreams Escapes, but I'd love to help you find something perfect here!"
-7. Never discuss politics, safety warnings, visa requirements, or anything outside of helping the customer plan a vacation.
-8. Keep every reply to 3-4 sentences maximum — be warm and concise, never overwhelming.
-9. If the customer seems stressed or unsure, reassure them first — vacation planning should feel exciting, not stressful.
+Conversation flow — follow this exact order, one question per reply:
+Step 1: Ask what KIND of vacation (beach / city & culture / adventure & nature / ski & snow).
+Step 2: Ask what MONTH or travel period.
+Step 3: Ask what BUDGET per person.
+Step 4: Recommend 1-2 packages from the catalog that best match. ONLY recommend packages that appear in the catalog list provided below. Do not invent packages.
 
-Output format rules:
-- When comparing two vacation packages, use this exact structure:
-  Option A: [name] - [one sentence benefit]
-  Option B: [name] - [one sentence benefit]
-  My pick: [which one and why, one sentence]
-- When listing multiple destinations, use a simple bullet list — one destination per line.
-- Never use markdown headers, pricing tables, or travel-industry jargon.
+Rules:
+- STRICT 2-sentence maximum per reply. Never write more than 2 sentences.
+- One question per reply. Never ask two things at once.
+- Never repeat a question already answered in the conversation.
+- Skip any step if the customer already gave that info.
+- Once you have kind + month + budget, go straight to a recommendation — no more questions.
+- Only recommend packages from the catalog list given to you. If none match, say so honestly.
+- Never discuss politics, safety, visas, or competitors.
 
-Example exchange (match this exact length, tone, and question style):
-User: do you have anything warm for next month?
-Luna: Oh, you're definitely going to love what we have for warm-weather escapes! Two of our most popular right now are the Bali Serenity Escape and the Maldives Beach Retreat — both are stunning for sunshine and relaxation. Could I ask what your budget per person is so I can point you to the best fit?
+Output format for a recommendation (use exactly this, nothing more):
+✈️ [Package name] — [one sentence why it fits].
+Would you like to see it?
 {_policies_summary()}
 """
 
@@ -236,9 +253,12 @@ async def chat(req: ChatRequest):
     if relevant:
         catalog_lines = []
         for p in relevant:
-            stock = 'available this month' if p.get('inStock') else 'not available this month'
+            # All products are now normalized to name/price/description/inStock
+            name  = p.get('name', '')
             price = p.get('price', 'N/A')
-            line = f"- {p['name']} (${price}) [{stock}]: {p.get('description', '')}"
+            desc  = p.get('description', '')
+            stock = 'available this month' if p.get('inStock') else 'not available this month'
+            line  = f"- {name} (${price}) [{stock}]: {desc}"
             catalog_lines.append(line)
         catalog = '\n'.join(catalog_lines)
         full_prompt = (
@@ -263,4 +283,17 @@ async def chat(req: ChatRequest):
         max_tokens=400,
         temperature=0.7
     )
-    return {'reply': response.choices[0].message.content}
+    reply_text = response.choices[0].message.content
+
+    # Detect if a product name from the catalog was mentioned in the reply
+    suggested_search: str | None = None
+    if relevant:
+        reply_lower = reply_text.lower()
+        for p in relevant:
+            # All products are now normalized — always has 'name'
+            name = p.get('name', '')
+            if name and name.lower() in reply_lower:
+                suggested_search = name
+                break
+
+    return {'reply': reply_text, 'suggestedSearch': suggested_search}
