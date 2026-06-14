@@ -360,8 +360,6 @@
 
                 <th pSortableColumn="orderId">Order ID</th>
 
-                <th>User ID</th>
-
                 <th>Begin Date</th>
 
                 <th>End Date</th>
@@ -382,8 +380,6 @@
               <tr>
 
                 <td>{{ order.orderId }}</td>
-
-                <td>{{ order.userId }}</td>
 
                 <td>{{ order.beginDate ? (order.beginDate | date:'mediumDate') : '-' }}</td>
 

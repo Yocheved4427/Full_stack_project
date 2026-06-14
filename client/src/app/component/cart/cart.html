@@ -26,15 +26,18 @@
                                 <div class="edit-form" *ngIf="editingItemId === item.cartItemId">
                                     <div class="form-row">
                                         <label>Start Date</label>
-                                        <input type="date" class="p-inputtext p-component" [ngModel]="editStartDate()" (ngModelChange)="editStartDate.set($event)" />
+                                        <input type="date" class="p-inputtext p-component" [min]="todayStr" [ngModel]="editStartDate()" (ngModelChange)="onEditStartDateChange($event)" />
                                     </div>
                                     <div class="form-row">
                                         <label>End Date</label>
-                                        <input type="date" class="p-inputtext p-component" [ngModel]="editEndDate()" (ngModelChange)="editEndDate.set($event)" />
+                                        <input type="date" class="p-inputtext p-component" [min]="editMinEndDateStr" [ngModel]="editEndDate()" (ngModelChange)="editEndDate.set($event)" />
                                     </div>
                                     <div class="form-row">
                                         <label>Participants</label>
                                         <input type="number" min="1" class="p-inputtext p-component" [ngModel]="editParticipants()" (ngModelChange)="editParticipants.set($event)" />
+                                    </div>
+                                    <div *ngIf="editDateError()" class="date-error">
+                                        <i class="pi pi-exclamation-triangle"></i> {{ editDateError() }}
                                     </div>
                                 </div>
                             </div>
@@ -68,7 +71,10 @@
         </div>
         <div class="action-buttons">
             <p-button label="Clear Cart" severity="danger" [outlined]="true" (onClick)="clearCart()" />
-            <p-button label="Checkout" icon="pi pi-check" severity="success" (onClick)="checkout()" />
+            <p-button label="Checkout" icon="pi pi-check" severity="success" (onClick)="checkout()"
+              [disabled]="isAdmin"
+              [pTooltip]="isAdmin ? 'Admins cannot place orders' : ''"
+              tooltipPosition="top" />
         </div>
     </div>
   </div>

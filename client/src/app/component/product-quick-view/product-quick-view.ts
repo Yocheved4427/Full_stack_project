@@ -41,6 +41,7 @@ export class ProductQuickViewComponent implements OnChanges {
   endDate: Date | null = null;
   participants: number = 1;
   minDate: Date = new Date();
+  minEndDate: Date = new Date(new Date().getTime() + 86400000);
   images: any[] = [];
   activeIndex: number = 0;
   galleryKey: number = 0;
@@ -194,12 +195,25 @@ export class ProductQuickViewComponent implements OnChanges {
     );
   }
 
+  private updateMinEndDate(): void {
+    if (this.startDate) {
+      const next = new Date(this.startDate);
+      next.setDate(next.getDate() + 1);
+      this.minEndDate = next;
+    } else {
+      const tomorrow = new Date(this.minDate);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      this.minEndDate = tomorrow;
+    }
+  }
+
   onDateChange() {
     this.dateValidationError = '';
+    this.updateMinEndDate();
     
-    // If start date is after end date, show error and clear the end date
-    if (this.startDate && this.endDate && this.startDate > this.endDate) {
-      this.dateValidationError = 'End date must be after start date. Please select a valid end date.';
+    // End date must be strictly after start date (not the same day)
+    if (this.startDate && this.endDate && this.startDate >= this.endDate) {
+      this.dateValidationError = 'End date must be after start date. Please select a different end date.';
       this.endDate = null;
     }
     this.updatePeakPeriodMessage();
@@ -210,8 +224,8 @@ export class ProductQuickViewComponent implements OnChanges {
       return false;
     }
     
-    // Ensure start date is before or equal to end date
-    return this.startDate <= this.endDate;
+    // End date must be strictly after start date (at least 1 night)
+    return this.startDate < this.endDate;
   }
 
   nextImage() {

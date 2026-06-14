@@ -361,3 +361,18 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# ── Secrets / environment-specific overrides ──────────────────
+# appsettings.Development.json can hold local connection strings,
+# API keys, or other developer-specific secrets — never commit it.
+appsettings.Development.json
+appsettings.*.json
+!appsettings.json
+
+# .env files (if used alongside or instead of appsettings)
+.env
+*.env
+!.env.example
+
+# User secrets store (dotnet user-secrets)
+secrets.json

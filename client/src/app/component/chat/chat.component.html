@@ -1,0 +1,47 @@
+<button class="chat-toggle" (click)="isOpen = !isOpen" [title]="isOpen ? 'Close chat' : 'Chat with Luna'">
+  {{ isOpen ? '✕' : '🌍' }}
+</button>
+
+<div class="chat-window" *ngIf="isOpen">
+  <div class="chat-header">
+    <span class="header-avatar">🌙</span>
+    <div>
+      <div class="header-name">Luna</div>
+      <div class="header-sub">Dreams Escapes Travel Advisor</div>
+    </div>
+    <a class="dream-btn" routerLink="/dream-vacation" (click)="isOpen = false" title="Build My Dream Vacation">
+      ✨ Dream Planner
+    </a>
+  </div>
+
+  <div class="chat-messages" #scrollRef>
+    <div *ngIf="messages.length === 0" class="chat-welcome">
+      Hi! I'm Luna 🌙<br>Tell me where you dream of going and I'll find the perfect escape for you.
+    </div>
+    <div *ngFor="let m of messages" [class]="'msg ' + m.role">
+      {{ m.content }}
+    </div>
+    <div *ngIf="loading" class="msg assistant typing">
+      <span></span><span></span><span></span>
+    </div>
+    <div *ngIf="pendingSuggestion && !loading" class="msg assistant suggestion-prompt">
+      <span>Would you like to see <strong>{{ pendingSuggestion }}</strong>?</span>
+      <div class="suggestion-actions">
+        <button class="suggestion-yes" (click)="acceptSuggestion()">Yes, show me! ✈️</button>
+        <button class="suggestion-no" (click)="declineSuggestion()">No thanks</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="chat-input">
+    <textarea
+      [(ngModel)]="input"
+      (keydown)="onKey($event)"
+      placeholder="Ask me about destinations, packages, prices…"
+      rows="1">
+    </textarea>
+    <button (click)="send()" [disabled]="loading" title="Send">
+      ➤
+    </button>
+  </div>
+</div>

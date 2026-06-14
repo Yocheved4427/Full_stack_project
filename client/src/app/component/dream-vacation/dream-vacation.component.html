@@ -1,0 +1,290 @@
+<div class="dv-page" [ngClass]="themeClass()">
+
+  <!-- ════════════════════════════════════════════════════════════════════════
+       HERO HEADER
+  ══════════════════════════════════════════════════════════════════════════ -->
+  <header class="dv-hero">
+    <h1 class="dv-hero__title">Build My Dream Vacation</h1>
+    <p class="dv-hero__subtitle">
+      Describe your perfect escape — in words, voice, or a picture.
+    </p>
+  </header>
+
+  <!-- ════════════════════════════════════════════════════════════════════════
+       INSPIRATION INPUT SECTION
+  ══════════════════════════════════════════════════════════════════════════ -->
+  <section class="dv-card dv-input-section">
+
+    <!-- Mode tabs -->
+    <div class="dv-tabs" role="tablist">
+      <button role="tab" class="dv-tab" [class.dv-tab--active]="inputMode() === 'text'"
+              (click)="setMode('text')">
+        <i class="pi pi-pencil"></i> Describe it
+      </button>
+      <button role="tab" class="dv-tab" [class.dv-tab--active]="inputMode() === 'audio'"
+              (click)="setMode('audio')">
+        <i class="pi pi-microphone"></i> Record it
+      </button>
+      <button role="tab" class="dv-tab" [class.dv-tab--active]="inputMode() === 'image'"
+              (click)="setMode('image')">
+        <i class="pi pi-image"></i> Show it
+      </button>
+    </div>
+
+    <!-- ── Text panel ──────────────────────────────────────────────────── -->
+    @if (inputMode() === 'text') {
+      <div class="dv-panel" role="tabpanel">
+        <label class="dv-label" for="dv-text-input">
+          What does your dream vacation look like?
+        </label>
+        <textarea
+          id="dv-text-input"
+          class="dv-textarea"
+          rows="4"
+          maxlength="2000"
+          placeholder='e.g. "A calm August getaway with ocean views, not too expensive…"'
+          [value]="textInput()"
+          (input)="textInput.set($any($event.target).value)"
+          (keydown.enter)="$any($event).shiftKey ? null : submitText()"
+        ></textarea>
+        <div class="dv-char-count">{{ textInput().length }} / 2000</div>
+        <button pButton class="dv-submit-btn" [disabled]="!canSubmit()"
+                (click)="submitText()">
+          <i class="pi pi-sparkles"></i> Discover My Match
+        </button>
+      </div>
+    }
+
+    <!-- ── Audio panel ─────────────────────────────────────────────────── -->
+    @if (inputMode() === 'audio') {
+      <div class="dv-panel" role="tabpanel">
+        @if (!audioFile()) {
+          <div class="dv-audio-zone">
+            <button pButton class="dv-record-btn" [class.dv-record-btn--active]="isRecording()"
+                    (click)="toggleRecording()">
+              <i [class]="isRecording() ? 'pi pi-stop-circle' : 'pi pi-microphone'"></i>
+              {{ isRecording() ? 'Stop Recording' : 'Start Recording' }}
+            </button>
+            <p class="dv-hint">
+              {{ isRecording() ? 'Listening…' : 'Tap to describe your dream vacation out loud.' }}
+            </p>
+          </div>
+        } @else {
+          <div class="dv-audio-ready">
+            <i class="pi pi-check-circle dv-ready-icon"></i>
+            <span>Recording ready: <strong>{{ audioFile()!.name }}</strong></span>
+            <button pButton severity="secondary" size="small" (click)="clearAudio()">Re-record</button>
+          </div>
+          <button pButton class="dv-submit-btn" [disabled]="!canSubmit()"
+                  (click)="submitAudio()">
+            <i class="pi pi-sparkles"></i> Discover My Match
+          </button>
+        }
+      </div>
+    }
+
+    <!-- ── Image panel ─────────────────────────────────────────────────── -->
+    @if (inputMode() === 'image') {
+      <div class="dv-panel" role="tabpanel">
+        @if (!imageFile()) {
+          <div class="dv-drop-zone" [class.dv-drop-zone--over]="isDragOver()"
+               (dragover)="onDragOver($event)" (dragleave)="onDragLeave()" (drop)="onDrop($event)">
+            <i class="pi pi-cloud-upload dv-drop-icon"></i>
+            <p>Drag & drop an inspiration photo here</p>
+            <span class="dv-or">or</span>
+            <label class="dv-file-label" for="dv-image-input">Browse files</label>
+            <input id="dv-image-input" type="file" accept="image/*" hidden
+                   (change)="onImageFileSelected($event)" />
+            <p class="dv-hint">jpeg · png · gif · webp · max 20 MB</p>
+          </div>
+        } @else {
+          <div class="dv-image-preview-wrap">
+            <img class="dv-image-preview" [src]="imagePreviewUrl()" alt="Inspiration image preview" />
+            <button pButton severity="secondary" size="small" class="dv-clear-img"
+                    (click)="clearImage()">
+              <i class="pi pi-times"></i> Clear
+            </button>
+          </div>
+          <button pButton class="dv-submit-btn" [disabled]="!canSubmit()"
+                  (click)="submitImage()">
+            <i class="pi pi-sparkles"></i> Discover My Match
+          </button>
+        }
+      </div>
+    }
+
+    <!-- Error banner -->
+    @if (errorMsg()) {
+      <div class="dv-error" role="alert">
+        <i class="pi pi-exclamation-triangle"></i> {{ errorMsg() }}
+      </div>
+    }
+  </section>
+
+  <!-- ════════════════════════════════════════════════════════════════════════
+       LOADING
+  ══════════════════════════════════════════════════════════════════════════ -->
+  @if (loading()) {
+    <div class="dv-loading">
+      <p-progressSpinner strokeWidth="4" animationDuration="0.8s" />
+      <p>Analysing your dream…</p>
+    </div>
+  }
+
+  <!-- ════════════════════════════════════════════════════════════════════════
+       RESULTS  (only shown once we have a build result)
+  ══════════════════════════════════════════════════════════════════════════ -->
+  @if (buildResult(); as result) {
+
+    <!-- ── Travel Twin Profile ────────────────────────────────────────── -->
+    <section class="dv-card dv-twin-card">
+      <div class="dv-twin-badge">
+        <i [class]="twinIcon(result.travelTwin)"></i>
+      </div>
+      <div class="dv-twin-info">
+        <p class="dv-twin-label">Your Travel Twin</p>
+        <h2 class="dv-twin-name">{{ result.travelTwin }}</h2>
+        <div class="dv-twin-tags">
+          <span class="dv-tag">{{ result.analysis.detectedVibe }}</span>
+          <span class="dv-tag">{{ result.analysis.requestedWeather }}</span>
+          <span class="dv-tag">{{ result.analysis.pace }}</span>
+          <span class="dv-tag dv-tag--budget dv-tag--{{ result.analysis.estimatedBudgetLevel }}">
+            {{ result.analysis.estimatedBudgetLevel | titlecase }} budget
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── AI Recommendations ─────────────────────────────────────────── -->
+    <section class="dv-card">
+      <h3 class="dv-section-title">
+        <i class="pi pi-sparkles"></i> AI-Matched Packages
+      </h3>
+
+      <div class="dv-packages-grid">
+        @for (pkg of result.recommendedPackages; track pkg.productId; let i = $index) {
+          <article class="dv-package-card">
+            <div class="dv-package-img-wrap">
+              <img class="dv-package-img"
+                   [src]="pkg.mainImageUrl || 'assets/images/placeholder.jpg'"
+                   [alt]="pkg.productName" />
+              <span class="dv-score-badge">
+                {{ (result.similarityScores[i] * 100 | number:'1.0-0') }}% match
+              </span>
+            </div>
+            <div class="dv-package-body">
+              <h4 class="dv-package-name">{{ pkg.productName }}</h4>
+              <p class="dv-package-desc">{{ pkg.description }}</p>
+              <p class="dv-package-price">
+                <i class="pi pi-tag"></i>
+                from <strong>${{ pkg.price | number:'1.0-0' }}</strong> / person
+              </p>
+              <!-- Explainable AI -->
+              <div class="dv-why">
+                <i class="pi pi-lightbulb"></i>
+                <span>{{ result.whyRecommended[i] }}</span>
+              </div>
+            </div>
+          </article>
+        }
+      </div>
+    </section>
+
+    <!-- ── What-If Simulator ──────────────────────────────────────────── -->
+    <section class="dv-card dv-simulator">
+      <h3 class="dv-section-title">
+        <i class="pi pi-sliders-h"></i> What-If Simulator
+      </h3>
+      <p class="dv-sim-hint">Adjust the sliders to instantly re-rank destinations.</p>
+
+      <div class="dv-sliders">
+
+        <div class="dv-slider-row">
+          <label class="dv-slider-label">
+            <i class="pi pi-star"></i> Luxury Level
+            <span class="dv-slider-val">{{ luxury() }} / 5</span>
+          </label>
+          <input type="range" min="1" max="5" step="1"
+                 [value]="luxury()"
+                 (input)="luxury.set(+$any($event.target).value); onSliderChange()" />
+          <div class="dv-slider-track-labels">
+            <span>Budget</span><span>Luxury</span>
+          </div>
+        </div>
+
+        <div class="dv-slider-row">
+          <label class="dv-slider-label">
+            <i class="pi pi-globe"></i> Nature Vibe
+            <span class="dv-slider-val">{{ nature() }} / 5</span>
+          </label>
+          <input type="range" min="1" max="5" step="1"
+                 [value]="nature()"
+                 (input)="nature.set(+$any($event.target).value); onSliderChange()" />
+          <div class="dv-slider-track-labels">
+            <span>Urban</span><span>Wilderness</span>
+          </div>
+        </div>
+
+        <div class="dv-slider-row">
+          <label class="dv-slider-label">
+            <i class="pi pi-wallet"></i> Budget Limit
+            <span class="dv-slider-val">{{ budgetLabel() }}</span>
+          </label>
+          <input type="range" min="0" max="3000" step="50"
+                 [value]="budget()"
+                 (input)="budget.set(+$any($event.target).value); onSliderChange()" />
+          <div class="dv-slider-track-labels">
+            <span>No limit</span><span>$3,000</span>
+          </div>
+        </div>
+
+        <div class="dv-slider-row">
+          <label class="dv-slider-label">
+            <i class="pi pi-map"></i> Attractions
+            <span class="dv-slider-val">{{ attractions() }}</span>
+          </label>
+          <input type="range" min="0" max="5" step="1"
+                 [value]="attractions()"
+                 (input)="attractions.set(+$any($event.target).value); onSliderChange()" />
+          <div class="dv-slider-track-labels">
+            <span>Any</span><span>5+</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Simulator results -->
+      @if (simResult(); as sim) {
+        <div class="dv-sim-meta">
+          Showing <strong>{{ sim.results.length }}</strong> of
+          <strong>{{ sim.totalConsidered }}</strong> packages
+          @if (sim.totalExcludedByBudget > 0) {
+            · <span class="dv-excluded">{{ sim.totalExcludedByBudget }} excluded by budget</span>
+          }
+        </div>
+
+        <div class="dv-sim-list">
+          @for (item of sim.results; track item.product.productId; let rank = $index) {
+            <div class="dv-sim-item">
+              <span class="dv-sim-rank">#{{ rank + 1 }}</span>
+              <img class="dv-sim-thumb"
+                   [src]="item.product.mainImageUrl || 'assets/images/placeholder.jpg'"
+                   [alt]="item.product.productName" />
+              <div class="dv-sim-body">
+                <strong>{{ item.product.productName }}</strong>
+                <span class="dv-sim-reason">{{ item.matchReason }}</span>
+              </div>
+              <div class="dv-sim-score">
+                <span>{{ (item.score * 100 | number:'1.0-0') }}%</span>
+                <div class="dv-score-bar">
+                  <div class="dv-score-fill" [style.width.%]="item.score * 100"></div>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </section>
+  }
+
+</div>

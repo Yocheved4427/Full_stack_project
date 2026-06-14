@@ -1,7 +1,7 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { CardModule } from 'primeng/card';
@@ -97,12 +97,23 @@ export class UserProfile implements OnInit {
     private userService: UserService,
     private apiService: ApiService,
     private router: Router,
+    private route: ActivatedRoute,
     private messageService: MessageService
   ) {}
 
   ngOnInit(): void {
+    if (this.userService.isAdmin()) {
+      this.router.navigate(['/admin']);
+      return;
+    }
     this.loadUserProfile();
     this.loadOrderHistory();
+
+    this.route.queryParams.subscribe(params => {
+      if (params['tab']) {
+        this.activeTab.set(params['tab']);
+      }
+    });
   }
 
   loadUserProfile(): void {

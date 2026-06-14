@@ -23,6 +23,10 @@ builder.Services.AddScoped<IRatingRepository, RatingRepository>();
 builder.Services.AddScoped<IRatingService, RatingService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddHostedService<OrderStatusUpdaterService>();
+builder.Services.AddHostedService<EmbeddingIndexService>();
+builder.Services.AddHttpClient();
+builder.Services.AddHttpClient<IVacationService, VacationService>(c =>
+    c.BaseAddress = new Uri("http://localhost:8001/"));
 
 builder.Host.UseNLog();
 

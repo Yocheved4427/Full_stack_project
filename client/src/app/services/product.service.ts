@@ -18,7 +18,7 @@ export interface PageResponse<T> {
 })
 export class ProductService {
 
-  private apiUrl = 'https://localhost:44386/api/Products'; 
+  private apiUrl = '/api/Products';
 
   constructor(private http: HttpClient) { }
 

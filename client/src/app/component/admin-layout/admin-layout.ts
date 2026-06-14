@@ -17,7 +17,7 @@ export class AdminLayout {
   menuItems: MenuItem[] = [];
 
   constructor(
-    private router: Router,
+    public router: Router,
     private userService: UserService
   ) {
     this.initializeMenu();

@@ -7,11 +7,49 @@ namespace WebApiShop.Controllers
     public class ImageUploadController : ControllerBase
     {
         private readonly IWebHostEnvironment _environment;
-        private const string ClientImagesPath = @"F:\project\client\public\images";
+        private readonly string _clientImagesPath;
 
         public ImageUploadController(IWebHostEnvironment environment)
         {
             _environment = environment;
+            _clientImagesPath = ResolveClientImagesPath(environment.ContentRootPath);
+        }
+
+        private static string ResolveClientImagesPath(string contentRootPath)
+        {
+            var projectRoot = Directory.GetParent(contentRootPath)?.Parent?.Parent?.FullName;
+            if (string.IsNullOrWhiteSpace(projectRoot))
+            {
+                return Path.GetFullPath(Path.Combine(contentRootPath, "..", "..", "..", "client", "public", "images"));
+            }
+
+            return Path.GetFullPath(Path.Combine(projectRoot, "client", "public", "images"));
+        }
+
+        private string GetClientImagesPathWithSeparator()
+        {
+            var fullPath = Path.GetFullPath(_clientImagesPath);
+            return fullPath.EndsWith(Path.DirectorySeparatorChar)
+                ? fullPath
+                : fullPath + Path.DirectorySeparatorChar;
+        }
+
+        private static string SanitizePathSegment(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return string.Empty;
+            }
+
+            var invalidChars = Path.GetInvalidFileNameChars();
+            var sanitized = new string(value
+                .Select(ch => invalidChars.Contains(ch) || ch == Path.DirectorySeparatorChar || ch == Path.AltDirectorySeparatorChar
+                    ? '_'
+                    : ch)
+                .ToArray())
+                .Trim();
+
+            return sanitized;
         }
 
         [HttpGet("image")]
@@ -25,11 +63,12 @@ namespace WebApiShop.Controllers
                 // Remove "images/" prefix if present
                 var relativePath = path.StartsWith("images/") ? path.Substring("images/".Length) : path;
                 
-                var fullPath = Path.Combine(ClientImagesPath, relativePath);
+                var fullPath = Path.Combine(_clientImagesPath, relativePath);
                 var normalizedPath = Path.GetFullPath(fullPath);
+                var clientRoot = GetClientImagesPathWithSeparator();
 
                 // Security check: ensure file is within client images directory
-                if (!normalizedPath.StartsWith(ClientImagesPath))
+                if (!normalizedPath.StartsWith(clientRoot, StringComparison.OrdinalIgnoreCase))
                     return BadRequest("Invalid file path");
 
                 if (!System.IO.File.Exists(normalizedPath))
@@ -69,7 +108,13 @@ namespace WebApiShop.Controllers
                 if (string.IsNullOrWhiteSpace(categoryName) || string.IsNullOrWhiteSpace(productName))
                     return BadRequest("Category name and product name are required");
 
-                var productPath = Path.Combine(ClientImagesPath, categoryName, productName);
+                var safeCategoryName = SanitizePathSegment(categoryName);
+                var safeProductName = SanitizePathSegment(productName);
+
+                if (string.IsNullOrWhiteSpace(safeCategoryName) || string.IsNullOrWhiteSpace(safeProductName))
+                    return BadRequest("Category name and product name are invalid");
+
+                var productPath = Path.Combine(_clientImagesPath, safeCategoryName, safeProductName);
                 
                 if (!Directory.Exists(productPath))
                     return Ok(new List<string>());
@@ -77,7 +122,7 @@ namespace WebApiShop.Controllers
                 var imageFiles = Directory.GetFiles(productPath, "*.*", SearchOption.TopDirectoryOnly)
                     .Where(file => new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" }
                         .Contains(Path.GetExtension(file).ToLower()))
-                    .Select(file => $"images/{categoryName}/{productName}/{Path.GetFileName(file)}")
+                    .Select(file => $"images/{safeCategoryName}/{safeProductName}/{Path.GetFileName(file)}")
                     .ToList();
 
                 return Ok(imageFiles);
@@ -137,8 +182,14 @@ namespace WebApiShop.Controllers
                 if (string.IsNullOrWhiteSpace(categoryName) || string.IsNullOrWhiteSpace(productName))
                     return BadRequest("Category name and product name are required");
 
+                var safeCategoryName = SanitizePathSegment(categoryName);
+                var safeProductName = SanitizePathSegment(productName);
+
+                if (string.IsNullOrWhiteSpace(safeCategoryName) || string.IsNullOrWhiteSpace(safeProductName))
+                    return BadRequest("Category name and product name are invalid");
+
                 var uploadedUrls = new List<string>();
-                var imagesPath = Path.Combine(ClientImagesPath, categoryName, productName);
+                var imagesPath = Path.Combine(_clientImagesPath, safeCategoryName, safeProductName);
                 
                 if (!Directory.Exists(imagesPath))
                 {
@@ -152,7 +203,7 @@ namespace WebApiShop.Controllers
                         // Use original filename
                         var fileName = Path.GetFileName(file.FileName);
                         var filePath = Path.Combine(imagesPath, fileName);
-                        var relativeUrl = $"images/{categoryName}/{productName}/{fileName}";
+                        var relativeUrl = $"images/{safeCategoryName}/{safeProductName}/{fileName}";
 
                         // If file already exists, use the existing file instead of creating a duplicate
                         if (System.IO.File.Exists(filePath))
@@ -194,11 +245,12 @@ namespace WebApiShop.Controllers
 
                 // Remove "images/" prefix and construct full path
                 var relativePath = imagePath.Substring("images/".Length);
-                var fullPath = Path.Combine(ClientImagesPath, relativePath);
+                var fullPath = Path.Combine(_clientImagesPath, relativePath);
 
                 // Security check: ensure file is within client images directory
                 var normalizedPath = Path.GetFullPath(fullPath);
-                if (!normalizedPath.StartsWith(ClientImagesPath))
+                var clientRoot = GetClientImagesPathWithSeparator();
+                if (!normalizedPath.StartsWith(clientRoot, StringComparison.OrdinalIgnoreCase))
                     return BadRequest("Invalid file path");
 
                 if (System.IO.File.Exists(fullPath))

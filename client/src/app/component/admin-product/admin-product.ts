@@ -115,6 +115,9 @@ export class AdminProduct implements OnInit, OnChanges {
     const category = this.categories.find(c => c.categoryId === this.categoryId);
     if (!category) return;
 
+    const safeCategoryName = this.sanitizePathSegment(category.categoryName);
+    const safeProductName = this.sanitizePathSegment(this.productName);
+
     // Call API to get existing images from file system
     const listUrl = `${this.uploadUrl.replace('/multiple', '/list')}?categoryName=${encodeURIComponent(category.categoryName)}&productName=${encodeURIComponent(this.productName)}`;
     
@@ -122,9 +125,10 @@ export class AdminProduct implements OnInit, OnChanges {
       next: (imageUrls) => {
         this.images = [];
         imageUrls.forEach((url, index) => {
+          const normalizedUrl = this.normalizeImageUrl(url, safeCategoryName, safeProductName);
           this.images.push({
-            url: url,
-            isMain: url === this.product?.mainImageUrl || (index === 0 && !this.product?.mainImageUrl),
+            url: normalizedUrl,
+            isMain: normalizedUrl === this.product?.mainImageUrl || (index === 0 && !this.product?.mainImageUrl),
             isNew: false
           });
         });
@@ -135,7 +139,7 @@ export class AdminProduct implements OnInit, OnChanges {
         this.images = [];
         if (this.product?.mainImageUrl) {
           this.images.push({
-            url: this.product.mainImageUrl,
+            url: this.normalizeImageUrl(this.product.mainImageUrl, safeCategoryName, safeProductName),
             isMain: true,
             isNew: false
           });
@@ -144,7 +148,7 @@ export class AdminProduct implements OnInit, OnChanges {
           this.product.imageUrls.forEach(url => {
             if (url !== this.product!.mainImageUrl) {
               this.images.push({
-                url: url,
+                url: this.normalizeImageUrl(url, safeCategoryName, safeProductName),
                 isMain: false,
                 isNew: false
               });
@@ -191,6 +195,37 @@ export class AdminProduct implements OnInit, OnChanges {
     this.initializeMonthConfigs();
   }
 
+  private sanitizePathSegment(value: string): string {
+    return (value || '')
+      .replace(/[<>:"/\\|?*]/g, '_')
+      .trim();
+  }
+
+  private normalizeImageUrl(rawUrl: string, categoryName: string, productName: string): string {
+    const normalized = (rawUrl || '').replace(/\\/g, '/').trim();
+    if (!normalized) return normalized;
+
+    if (
+      normalized.startsWith('http://') ||
+      normalized.startsWith('https://') ||
+      normalized.startsWith('images/') ||
+      normalized.startsWith('/images/') ||
+      normalized.includes('images/products/')
+    ) {
+      return normalized;
+    }
+
+    if (normalized.includes('/')) {
+      return normalized;
+    }
+
+    if (!categoryName || !productName) {
+      return normalized;
+    }
+
+    return `images/${categoryName}/${productName}/${normalized}`;
+  }
+
   onFileSelect(event: any): void {
     const input = event.target as HTMLInputElement;
     const files = input.files;
@@ -230,6 +265,9 @@ export class AdminProduct implements OnInit, OnChanges {
         uploadUrl: this.uploadUrl
       });
 
+      const safeCategoryName = this.sanitizePathSegment(selectedCategory.categoryName);
+      const safeProductName = this.sanitizePathSegment(this.productName);
+
       // Upload files to server
       const formData = new FormData();
       for (let i = 0; i < files.length; i++) {
@@ -245,11 +283,12 @@ export class AdminProduct implements OnInit, OnChanges {
           // Add uploaded images with server URLs, but avoid duplicates
           let addedCount = 0;
           uploadedUrls.forEach((url, index) => {
+            const normalizedUrl = this.normalizeImageUrl(url, safeCategoryName, safeProductName);
             // Check if this URL already exists in the images array
-            const exists = this.images.some(img => img.url === url);
+            const exists = this.images.some(img => img.url === normalizedUrl);
             if (!exists) {
               this.images.push({
-                url: url,
+                url: normalizedUrl,
                 isMain: this.images.length === 0 && index === 0, // First image is main
                 isNew: true
               });

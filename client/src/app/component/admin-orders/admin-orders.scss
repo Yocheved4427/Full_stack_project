@@ -1,5 +1,37 @@
 .admin-orders-container {
+  padding: 1rem;
+
   .card {
     padding: 1.5rem;
+  }
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+
+  &.status-waiting {
+    background-color: #fff3cd;
+    color: #856404;
+  }
+
+
+  &.status-completed {
+    background-color: #d1fae5;
+    color: #065f46;
+  }
+
+  &.status-in-vacation {
+    background-color: #dbeafe;
+    color: #1e40af;
+  }
+
+  &.status-cancelled {
+    background-color: #fee2e2;
+    color: #991b1b;
   }
 }

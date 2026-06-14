@@ -8,7 +8,7 @@ import { Observable } from 'rxjs';
 export class ApiService {
 
 
-  private apiUrl = 'https://localhost:44386/api';
+  private apiUrl = '/api';
 
   constructor(private http: HttpClient) { }
 
@@ -61,7 +61,12 @@ export class ApiService {
   changePassword(passwordData: any): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/Users/change-password`, passwordData);
   }
+
   getAllOrders(): Observable<any[]> {
-  return this.http.get<any[]>(`${this.apiUrl}/Orders`);
-}
+    return this.http.get<any[]>(`${this.apiUrl}/Orders`);
+  }
+
+  getDashboardStats(): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/Orders/dashboard-stats`);
+  }
 }

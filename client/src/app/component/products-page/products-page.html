@@ -6,6 +6,21 @@
         <span>Dreams escapes Dreams escapes Dreams escapes Dreams escapes Dreams escapes Dreams escapes</span>
       </div>
     </div>
+
+    <!-- Semantic Search Bar -->
+    <div class="search-bar-wrapper">
+      <i class="pi pi-search search-icon"></i>
+      <input
+        class="search-input"
+        type="text"
+        [(ngModel)]="searchQuery"
+        (input)="onSearchInput(searchQuery)"
+        placeholder="Search destinations, vibes, budgets…"
+      />
+      <button *ngIf="searchQuery" class="search-clear" (click)="clearSearch()" title="Clear">✕</button>
+      <i *ngIf="isSearching" class="pi pi-spin pi-spinner search-spinner"></i>
+    </div>
+
     <div class="header-icons">
       <button class="icon-button cart-icon-wrapper" title="Shopping Cart" (click)="navigateToCart()">
         <i class="pi pi-shopping-cart"></i>
@@ -19,32 +34,67 @@
 
   <!-- Main Content -->
   <div class="page-layout">
-    <app-filters 
-      [totalItems]="totalItems" 
-      [pageSize]="pageSize" 
+    <app-filters
+      [totalItems]="totalItems"
+      [pageSize]="pageSize"
       [currentPage]="currentPage"
       (filtersChanged)="onFiltersChanged($event)"
       (pageChanged)="onPageChange($event)">
     </app-filters>
 
     <div class="products-section">
-      <div class="products-grid">
-        <app-product-card 
-            *ngFor="let p of paginatedProducts; trackBy: trackByProductId" 
-            [product]="p" 
-            (addToCartClick)="openQuickView(p)">
-        </app-product-card>
-      </div>
 
-      <div *ngIf="!isLoading && displayProducts.length === 0" class="no-products">
-        <i class="pi pi-inbox" style="font-size: 3rem; color: #ccc;"></i>
-        <p>No products found.</p>
-      </div>
-      
-      <div *ngIf="isLoading" class="no-products">
-        <i class="pi pi-spin pi-spinner" style="font-size: 3rem; color: #667eea;"></i>
-        <p>Loading products...</p>
-      </div>
+      <!-- ── SEMANTIC SEARCH RESULTS ─────────────────────────────── -->
+      <ng-container *ngIf="searchQuery.trim()">
+        <div class="search-results-header">
+          <span *ngIf="!isSearching">{{ searchResults.length }} result{{ searchResults.length !== 1 ? 's' : '' }} for &ldquo;{{ searchQuery }}&rdquo;</span>
+          <span *ngIf="isSearching">Searching…</span>
+        </div>
+
+        <div class="products-grid" *ngIf="searchResults.length > 0">
+          <div *ngFor="let item of searchResults" class="search-result-card" (click)="openSearchResultQuickView(item)">
+            <div class="search-result-body">
+              <div class="search-result-name">{{ item.name }}</div>
+              <div class="search-result-desc">{{ item.description }}</div>
+              <div class="search-result-footer">
+                <span class="search-result-price">${{ item.price | number:'1.0-0' }}</span>
+                <span class="search-result-badge" [class.available]="item.inStock" [class.unavailable]="!item.inStock">
+                  {{ item.inStock ? 'Available' : 'Unavailable' }}
+                </span>
+                <span class="search-result-score" title="Semantic relevance score">&#x2605; {{ item.score }}</span>
+              </div>
+              <button class="search-result-view-btn">View Package &#x279C;</button>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="!isSearching && searchResults.length === 0" class="no-products">
+          <i class="pi pi-search" style="font-size: 3rem; color: #ccc;"></i>
+          <p>No matching packages found. Try different words or ask Luna in the chat!</p>
+        </div>
+      </ng-container>
+
+      <!-- ── NORMAL PRODUCT GRID ─────────────────────────────────── -->
+      <ng-container *ngIf="!searchQuery.trim()">
+        <div class="products-grid">
+          <app-product-card
+              *ngFor="let p of paginatedProducts; trackBy: trackByProductId"
+              [product]="p"
+              (addToCartClick)="openQuickView(p)">
+          </app-product-card>
+        </div>
+
+        <div *ngIf="!isLoading && displayProducts.length === 0" class="no-products">
+          <i class="pi pi-inbox" style="font-size: 3rem; color: #ccc;"></i>
+          <p>No products found.</p>
+        </div>
+
+        <div *ngIf="isLoading" class="no-products">
+          <i class="pi pi-spin pi-spinner" style="font-size: 3rem; color: #667eea;"></i>
+          <p>Loading products...</p>
+        </div>
+      </ng-container>
+
     </div>
   </div>
 </div>

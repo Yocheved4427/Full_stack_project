@@ -70,9 +70,12 @@ namespace Services
         }
         public async Task<UserDTO?> Register(UserDTO user)
         {
+            if (await _repository.EmailExists(user.Email))
+                throw new Exception("An account with this email address already exists.");
+
             int passScore = _passwordServices.PasswordScore(user.Password);
-            if (passScore < 2)
-                throw new Exception("Password must be at least 8 characters and include a number and uppercase letter") ;
+            if (passScore < 1)
+                throw new Exception("Password is too weak. Avoid common words, sequences like '12345', or passwords like 'password' or 'abc123'.") ;
             
             User userEntity = _mapper.Map<User>(user);
 
@@ -112,8 +115,8 @@ namespace Services
                 return "Current password is incorrect";
 
             int passScore = _passwordServices.PasswordScore(newPassword);
-            if (passScore < 2)
-                return "Password must be at least 8 characters and include a number and uppercase letter";
+            if (passScore < 1)
+                return "Password is too weak. Avoid common words, sequences like '12345', or passwords like 'password' or 'abc123'.";
 
             user.Password = newPassword;
             await _repository.Update(userId, user);

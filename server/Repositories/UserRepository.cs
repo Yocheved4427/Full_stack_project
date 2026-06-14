@@ -40,6 +40,13 @@ namespace Repositories
             return storedPassword == incomingPassword ? user : null;
 
         }
+
+        public async Task<bool> EmailExists(string email)
+        {
+            var normalized = email.Trim().ToLower();
+            return await _context.Users.AnyAsync(u => u.Email.ToLower() == normalized);
+        }
+
         public async Task<User?> Register(User user)
         {
             await _context.Users.AddAsync(user);
