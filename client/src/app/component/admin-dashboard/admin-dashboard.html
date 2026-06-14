@@ -1,0 +1,73 @@
+<div class="dashboard-container">
+
+  <div *ngIf="isLoading" class="loading">
+    <i class="pi pi-spin pi-spinner" style="font-size:2rem"></i>
+    <p>Loading dashboard...</p>
+  </div>
+
+  <ng-container *ngIf="!isLoading">
+
+    <!-- Summary Cards -->
+    <div class="stats-grid">
+      <div class="stat-card stat-orders">
+        <div class="stat-icon"><i class="pi pi-shopping-cart"></i></div>
+        <div class="stat-info">
+          <div class="stat-value">{{ totalOrders }}</div>
+          <div class="stat-label">Total Orders</div>
+        </div>
+      </div>
+      <div class="stat-card stat-revenue">
+        <div class="stat-icon"><i class="pi pi-dollar"></i></div>
+        <div class="stat-info">
+          <div class="stat-value">${{ totalRevenue | number:'1.0-0' }}</div>
+          <div class="stat-label">Total Revenue</div>
+        </div>
+      </div>
+      <div class="stat-card stat-customers">
+        <div class="stat-icon"><i class="pi pi-users"></i></div>
+        <div class="stat-info">
+          <div class="stat-value">{{ totalCustomers }}</div>
+          <div class="stat-label">Unique Customers</div>
+        </div>
+      </div>
+      <div class="stat-card stat-pending">
+        <div class="stat-icon"><i class="pi pi-clock"></i></div>
+        <div class="stat-info">
+          <div class="stat-value">{{ pendingOrders }}</div>
+          <div class="stat-label">Pending Orders</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sales by Month Bar Chart -->
+    <div class="chart-card">
+      <h3 class="chart-title">
+        <i class="pi pi-chart-bar"></i> Sales by Month
+      </h3>
+      <p-chart type="bar" [data]="salesByMonthData" [options]="salesByMonthOptions" height="320px"></p-chart>
+    </div>
+
+    <!-- Two charts side by side -->
+    <div class="charts-row">
+
+      <!-- Orders by Status Pie -->
+      <div class="chart-card half">
+        <h3 class="chart-title">
+          <i class="pi pi-chart-pie"></i> Orders by Status
+        </h3>
+        <p-chart type="doughnut" [data]="ordersByStatusData" [options]="ordersByStatusOptions" height="300px"></p-chart>
+      </div>
+
+      <!-- Cumulative Revenue Line -->
+      <div class="chart-card half">
+        <h3 class="chart-title">
+          <i class="pi pi-chart-line"></i> Cumulative Revenue
+        </h3>
+        <p-chart type="line" [data]="revenueData" [options]="revenueOptions" height="300px"></p-chart>
+      </div>
+
+    </div>
+
+  </ng-container>
+
+</div>

@@ -19,6 +19,8 @@ namespace WebApiShop
             CreateMap<Order, OrderDTO>()
                 .ForMember(dest => dest.OrderDate, opt => opt.MapFrom(src => 
                     src.OrderDate.HasValue ? src.OrderDate.Value.ToString("yyyy-MM-dd") : ""))
+                .ForMember(dest => dest.CustomerName, opt => opt.MapFrom(src =>
+                    src.User != null ? src.User.FirstName + " " + src.User.LastName : "Unknown"))
                 .ForMember(dest => dest.OrderItems, opt => opt.MapFrom(src => src.OrderItems));
             
             // Map OrderItemDTO to OrderItem (ignore fields that don't exist in entity)
@@ -56,9 +58,30 @@ namespace WebApiShop
                 .ForMember(dest => dest.Orders, opt => opt.Ignore());
             
             CreateMap<User, ExistingUserDTO>().ReverseMap();
-            CreateMap<Product, ProductDTO>().ReverseMap();
+            // Positional records require explicit ConstructUsing — AutoMapper cannot
+            // automatically find a parameterless constructor for them.
+            CreateMap<ProductMonthConfig, ProductMonthConfigDTO>()
+                .ConstructUsing(src => new ProductMonthConfigDTO(
+                    src.ConfigId,
+                    src.MonthNumber ?? 0,
+                    src.IsAvailable,
+                    src.SpecialPrice ?? 0m));
+
+            CreateMap<Product, ProductDTO>()
+                .ConstructUsing((src, ctx) => new ProductDTO(
+                    src.ProductId,
+                    src.ProductName ?? string.Empty,
+                    src.Description ?? string.Empty,
+                    src.CategoryId ?? 0,
+                    src.Price ?? 0m,
+                    src.Images.FirstOrDefault(i => i.IsMain)?.Url
+                        ?? src.Images.FirstOrDefault()?.Url
+                        ?? string.Empty,
+                    src.IsActive,
+                    src.Images.Select(i => i.Url ?? string.Empty).ToList(),
+                    ctx.Mapper.Map<List<ProductMonthConfigDTO>>(src.ProductMonthConfigs.ToList())));
+
             CreateMap<Image, ImageDTO>().ReverseMap();
-            CreateMap<ProductMonthConfig, ProductMonthConfigDTO>().ReverseMap();
 
         }
     }

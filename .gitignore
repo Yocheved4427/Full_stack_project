@@ -1,0 +1,28 @@
+# ─────────────────────────────────────────────────────────────
+# Root-level .gitignore for the Dreams Escapes mono-repo
+# Each sub-project (ai-service/, client/, server/) also has
+# its own .gitignore for framework-specific patterns.
+# ─────────────────────────────────────────────────────────────
+
+# ── OS ────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+ehthumbs.db
+
+# ── Editor / IDE ──────────────────────────────────────────────
+.idea/
+*.swp
+*.swo
+*~
+
+# ── Environment / secrets ─────────────────────────────────────
+# ai-service/.env is caught by ai-service/.gitignore too,
+# but list it here as a safety net for any future root .env.
+.env
+*.env
+!.env.example
+
+# ── Logs ──────────────────────────────────────────────────────
+*.log
+logs/

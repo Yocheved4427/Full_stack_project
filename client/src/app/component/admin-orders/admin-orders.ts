@@ -28,4 +28,12 @@ export class AdminOrders implements OnInit {
       }
     });
   }
+
+  getStatusClass(status: string): string {
+    const s = (status || '').toLowerCase().trim();
+    if (s === 'completed') return 'status-badge status-completed';
+    if (s === 'in vacation') return 'status-badge status-in-vacation';
+    if (s === 'cancelled') return 'status-badge status-cancelled';
+    return 'status-badge status-waiting';
+  }
 }

@@ -1,57 +1,44 @@
-﻿using Entities;
+﻿using DTOs;
+using Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace Repositories
-
-
 {
-
     public class OrdersRepository : IOrdersRepository
     {
-       public readonly ApiShopContext _context;
+        public readonly ApiShopContext _context;
         public OrdersRepository(ApiShopContext context)
         {
             _context = context;
         }
+
         public async Task<Order?> GetOrderById(int id)
         {
             return await _context.Orders
                 .Include(o => o.OrderItems)
                 .FirstOrDefaultAsync(o => o.OrderId == id);
         }
+
         public async Task<Order> AddOrder(Order order)
         {
             try
             {
-                Console.WriteLine("[OrdersRepository] Starting to add order to database");
-                Console.WriteLine($"[OrdersRepository] Order details - UserId: {order.UserId}, OrderSum: {order.OrderSum}, OrderItems: {order.OrderItems?.Count ?? 0}");
-                
                 await _context.Orders.AddAsync(order);
-                Console.WriteLine("[OrdersRepository] Order added to context");
-                
-                var saveResult = await _context.SaveChangesAsync();
-                Console.WriteLine($"[OrdersRepository] SaveChanges completed - affected rows: {saveResult}");
-                Console.WriteLine($"[OrdersRepository] Order ID after save: {order.OrderId}");
-                
-                // Reload with Product navigation properties
+                await _context.SaveChangesAsync();
+
                 var reloadedOrder = await _context.Orders
                     .Include(o => o.OrderItems)
                         .ThenInclude(oi => oi.Product)
                             .ThenInclude(p => p.Images)
                     .FirstAsync(o => o.OrderId == order.OrderId);
-                
-                Console.WriteLine($"[OrdersRepository] Order reloaded successfully with {reloadedOrder.OrderItems?.Count ?? 0} items");
-                
+
                 return reloadedOrder;
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"[OrdersRepository] ERROR: {ex.Message}");
-                Console.WriteLine($"[OrdersRepository] Stack: {ex.StackTrace}");
                 if (ex.InnerException != null)
-                {
                     Console.WriteLine($"[OrdersRepository] Inner: {ex.InnerException.Message}");
-                }
                 throw;
             }
         }
@@ -71,14 +58,14 @@ namespace Repositories
 
             foreach (var order in orders)
             {
-                var hasStarted = order.OrderItems.Any(oi => oi.DepartureDate.HasValue && oi.DepartureDate.Value <= today);
-                var allFinished = order.OrderItems.Any() && order.OrderItems.All(oi => oi.ReturnDate.HasValue && oi.ReturnDate.Value < today);
+                var hasStarted = order.OrderItems.Any(oi =>
+                    oi.DepartureDate.HasValue && oi.DepartureDate.Value <= today);
+                var allFinished = order.OrderItems.Any() &&
+                    order.OrderItems.All(oi => oi.ReturnDate.HasValue && oi.ReturnDate.Value < today);
 
-                var newStatus = allFinished
-                    ? "Completed"
-                    : hasStarted
-                        ? "In Vacation"
-                        : "waiting...";
+                var newStatus = allFinished ? "Completed"
+                    : hasStarted ? "In Vacation"
+                    : "waiting...";
 
                 if (!string.Equals(order.Status, newStatus, StringComparison.OrdinalIgnoreCase))
                 {
@@ -88,31 +75,68 @@ namespace Repositories
             }
 
             if (hasChanges)
-            {
                 await _context.SaveChangesAsync();
-            }
 
             return orders;
         }
+
         public async Task<List<Order>> GetAllOrders()
         {
-          
-           
             return await _context.Orders
                 .AsNoTracking()
                 .Include(o => o.User)
-                .OrderByDescending(o => o.OrderDate)
-                .ToListAsync();
-        }
-        public async Task<List<Order>> GetAllOrdersForAdmin()
-        {
-            return await _context.Orders
-                .AsNoTracking() 
-                .Include(o => o.User)
-                .Include(o => o.OrderItems) 
-                .OrderByDescending(o => o.OrderDate)
+                .OrderBy(o => o.OrderId)
                 .ToListAsync();
         }
 
+        public async Task<List<Order>> GetAllOrdersForAdmin()
+        {
+            return await _context.Orders
+                .AsNoTracking()
+                .Include(o => o.User)
+                .Include(o => o.OrderItems)
+                .OrderBy(o => o.OrderId)
+                .ToListAsync();
+        }
+
+        public async Task<DashboardStatsDTO> GetDashboardStats()
+        {
+            var raw = await _context.Orders
+                .AsNoTracking()
+                .Select(o => new { o.UserId, o.OrderDate, o.OrderSum, o.Status })
+                .ToListAsync();
+
+            var totalOrders = raw.Count;
+            var totalRevenue = raw.Sum(o => o.OrderSum ?? 0);
+            var totalCustomers = raw.Select(o => o.UserId).Distinct().Count();
+            var pendingOrders = raw.Count(o =>
+                (o.Status ?? "").IndexOf("wait", StringComparison.OrdinalIgnoreCase) >= 0);
+
+            var salesByMonth = raw
+                .Where(o => o.OrderDate.HasValue)
+                .GroupBy(o => o.OrderDate!.Value.Month)
+                .Select(g => new MonthStatDTO
+                {
+                    Month = g.Key,
+                    Revenue = g.Sum(o => o.OrderSum ?? 0),
+                    OrderCount = g.Count()
+                })
+                .ToList();
+
+            var ordersByStatus = raw
+                .GroupBy(o => o.Status ?? "Unknown")
+                .Select(g => new StatusStatDTO { Status = g.Key, Count = g.Count() })
+                .ToList();
+
+            return new DashboardStatsDTO
+            {
+                TotalOrders = totalOrders,
+                TotalRevenue = totalRevenue,
+                TotalCustomers = totalCustomers,
+                PendingOrders = pendingOrders,
+                SalesByMonth = salesByMonth,
+                OrdersByStatus = ordersByStatus
+            };
+        }
     }
 }

@@ -1,0 +1,92 @@
+.dashboard-container {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem;
+  color: #6b7280;
+  gap: 1rem;
+}
+
+/* ── Stat Cards ── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+
+  @media (max-width: 1024px) { grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: 600px)  { grid-template-columns: 1fr; }
+}
+
+.stat-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  border-radius: 12px;
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.1);
+
+  .stat-icon {
+    font-size: 2rem;
+    opacity: 0.85;
+  }
+
+  .stat-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 0.85rem;
+    opacity: 0.9;
+    margin-top: 0.2rem;
+  }
+
+  &.stat-orders   { background: linear-gradient(135deg, #667eea, #764ba2); }
+  &.stat-revenue  { background: linear-gradient(135deg, #10b981, #059669); }
+  &.stat-customers{ background: linear-gradient(135deg, #f59e0b, #d97706); }
+  &.stat-pending  { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+}
+
+/* ── Chart Cards ── */
+.chart-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+
+  &.half {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+}
+
+.chart-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 1rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  i { color: #667eea; }
+}
+
+.charts-row {
+  display: flex;
+  gap: 1.5rem;
+
+  @media (max-width: 900px) {
+    flex-direction: column;
+  }
+}

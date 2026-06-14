@@ -1,4 +1,5 @@
 ﻿using Entities;
+using DTOs;
 
 namespace Repositories
 {
@@ -7,7 +8,7 @@ namespace Repositories
         Task<Order?> GetOrderById(int id);
         Task<Order> AddOrder(Order order);
         Task<List<Order>> GetOrdersByUserId(int userId);
-
         Task<List<Order>> GetAllOrders();
+        Task<DashboardStatsDTO> GetDashboardStats();
     }
 }

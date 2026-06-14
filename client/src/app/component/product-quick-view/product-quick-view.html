@@ -63,12 +63,12 @@
       <div class="field-group">
         <div class="field">
           <label>Start Date:</label>
-          <p-datepicker [(ngModel)]="startDate" [minDate]="minDate" [disabledDates]="disabledDates" (ngModelChange)="onDateChange()" placeholder="Select start date" [style]="{width: '100%'}" appendTo="body"></p-datepicker>
+          <p-datepicker [(ngModel)]="startDate" [minDate]="minDate" [disabledDates]="disabledDates" (ngModelChange)="onDateChange()" placeholder="Select start date" [style]="{width: '100%'}" appendTo="body" [baseZIndex]="20000"></p-datepicker>
         </div>
 
         <div class="field">
           <label>End Date:</label>
-          <p-datepicker [(ngModel)]="endDate" [minDate]="startDate || minDate" [disabledDates]="disabledDates" (ngModelChange)="onDateChange()" placeholder="Select end date" [style]="{width: '100%'}" appendTo="body"></p-datepicker>
+          <p-datepicker [(ngModel)]="endDate" [minDate]="minEndDate" [disabledDates]="disabledDates" (ngModelChange)="onDateChange()" placeholder="Select end date" [style]="{width: '100%'}" appendTo="body" [baseZIndex]="20000"></p-datepicker>
         </div>
       </div>
 

@@ -78,7 +78,7 @@ namespace Services
                         </div>
                         <div class='content'>
                             <p>Dear {customerName},</p>
-                            <p>Thank you for choosing Vacation Shop! We're excited to confirm your order.</p>
+                            <p>Thank you for choosing  Dream Escapes! We're excited to confirm your order.</p>
                             <div class='order-details'>
                                 <h2>Order Details</h2>
                                 <p><strong>Order Number:</strong> {orderNumber}</p>
@@ -89,10 +89,10 @@ namespace Services
                                 <p>{orderItems}</p>
                             </div>
                             <p>We will send you another email when your booking is confirmed.</p>
-                            <p>Best regards,<br/>The Vacation Shop Team</p>
+                            <p>Best regards,<br/>The Dreams Escapes Team</p>
                         </div>
                         <div class='footer'>
-                            <p>© 2026 Vacation Shop. All rights reserved.</p>
+                            <p>© 2026 Dreams Escapes. All rights reserved.</p>
                         </div>
                     </div>
                 </body>

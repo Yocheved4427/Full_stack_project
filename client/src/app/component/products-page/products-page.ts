@@ -1,12 +1,14 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { Router, ActivatedRoute } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 import { ProductCard } from '../product-card/product-card.component';
 import { ProductService } from '../../services/product.service';
 import { Product } from '../../models/product.model';
 import { ProductFilter } from '../../models/filter.model';
 import { Filters } from '../filters/filters';
-import { Subject } from 'rxjs';
+import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { ProductQuickViewComponent } from '../product-quick-view/product-quick-view';
 import { CartService } from '../../services/cart.service';
@@ -15,7 +17,7 @@ import { UserService } from '../../services/user.service';
 @Component({
   selector: 'app-products-page',
   standalone: true,
-  imports: [CommonModule, ProductCard, Filters, ProductQuickViewComponent],
+  imports: [CommonModule, FormsModule, ProductCard, Filters, ProductQuickViewComponent],
   templateUrl: './products-page.html',
   styleUrl: './products-page.scss'
 })
@@ -37,21 +39,77 @@ export class ProductsPageComponent implements OnInit, OnDestroy {
   pageSize: number = 6;
   isLoading: boolean = false;
   cartItemCount: number = 0;
-  
+
+  // ── Semantic search ──────────────────────────────────────
+  searchQuery: string = '';
+  searchResults: any[] = [];
+  isSearching: boolean = false;
+  private searchInput$ = new Subject<string>();
   private destroy$ = new Subject<void>();
 
   constructor(
     private productService: ProductService,
     private cdr: ChangeDetectorRef,
     private router: Router,
+    private route: ActivatedRoute,
     private cartService: CartService,
-    private userService: UserService
+    private userService: UserService,
+    private http: HttpClient
   ) {}
 
   ngOnInit() {
-    // Load all products once
     this.loadProducts();
     this.updateCartCount();
+
+    // Debounce search: wait 400ms after the user stops typing
+    this.searchInput$.pipe(
+      debounceTime(400),
+      distinctUntilChanged(),
+      takeUntil(this.destroy$)
+    ).subscribe(query => this._runSearch(query));
+
+    // Auto-search if Luna navigated here with a ?search= query param.
+    // Uses the observable (not snapshot) so it fires even when already on this page.
+    this.route.queryParamMap.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(params => {
+      const chatSearch = params.get('search');
+      if (chatSearch) {
+        this.searchQuery = chatSearch;
+        this.isSearching = true;
+        this._runSearch(chatSearch);
+      }
+    });
+  }
+
+  onSearchInput(query: string) {
+    this.searchQuery = query;
+    if (!query.trim()) {
+      this.searchResults = [];
+      this.isSearching = false;
+      return;
+    }
+    this.isSearching = true;
+    this.searchInput$.next(query.trim());
+  }
+
+  private _runSearch(query: string) {
+    this.http.post<{ results: any[] }>('/api/search', { query, topK: 8 })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: res => {
+          this.searchResults = res.results;
+          this.isSearching = false;
+          this.cdr.detectChanges();
+        },
+        error: () => { this.isSearching = false; }
+      });
+  }
+
+  clearSearch() {
+    this.searchQuery = '';
+    this.searchResults = [];
+    this.isSearching = false;
   }
   
   loadProducts() {
@@ -149,6 +207,16 @@ export class ProductsPageComponent implements OnInit, OnDestroy {
     this.selectedProduct = product;
     this.productKey = product.productId;
     this.displayDialog = true;
+  }
+
+  openSearchResultQuickView(item: any) {
+    // Match the search result to the real product from allProducts by name
+    const match = this.allProducts.find(
+      p => p.productName?.toLowerCase() === item.name?.toLowerCase()
+    );
+    if (match) {
+      this.openQuickView(match);
+    }
   }
 
   navigateToCart() {

@@ -1,25 +1,25 @@
-<div class="p-4">
+<div class="admin-orders-container">
   <div class="card shadow-sm border-round-xl p-4 bg-white">
     <h2 class="text-3xl font-bold mb-4">All Orders</h2>
-    
+
     <p-table [value]="orders()" [loading]="isLoading()" [paginator]="true" [rows]="10" responsiveLayout="scroll" class="w-full">
       <ng-template pTemplate="header">
         <tr>
-          <th class="bg-gray-100">Order ID</th>
-          <th class="bg-gray-100">User ID</th>
-          <th class="bg-gray-100">Order Date</th>
-          <th class="bg-gray-100">Total Sum</th>
-          <th class="bg-gray-100">Status</th>
+          <th>Order ID</th>
+          <th>Customer Name</th>
+          <th>Order Date</th>
+          <th>Total Sum</th>
+          <th>Status</th>
         </tr>
       </ng-template>
       <ng-template pTemplate="body" let-order>
-        <tr class="hover:bg-gray-50">
+        <tr>
           <td class="font-semibold">#{{order.orderId}}</td>
-          <td>{{order.userId}}</td>
+          <td>{{order.customerName}}</td>
           <td>{{order.orderDate | date:'dd/MM/yyyy'}}</td>
-          <td class="text-primary font-bold">${{order.orderSum}}</td>
+          <td class="font-bold">${{order.orderSum}}</td>
           <td>
-            <span class="p-badge" [ngClass]="{'p-badge-warning': order.status === 'Waiting', 'p-badge-success': order.status === 'Completed'}">
+            <span [class]="getStatusClass(order.status)">
               {{order.status}}
             </span>
           </td>

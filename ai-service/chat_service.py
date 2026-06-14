@@ -1,12 +1,15 @@
 # chat_service.py
+from __future__ import annotations
+
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Body
+from fastapi import FastAPI, Body, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-from openai import OpenAI
+from pydantic import BaseModel, Field
+from openai import OpenAI, OpenAIError
 from dotenv import load_dotenv
-import os, json, numpy as np
+import base64, io, mimetypes, os, json, numpy as np
 from datetime import date
+from typing import Literal
 
 load_dotenv()
 
@@ -297,3 +300,340 @@ async def chat(req: ChatRequest):
                 break
 
     return {'reply': reply_text, 'suggestedSearch': suggested_search}
+
+
+# ════════════════════════════════════════════════════════════════════
+# DREAM VACATION GENERATOR
+# Analyses a user's vacation profile from three input types:
+#   1. Free text        → POST /dream-vacation/analyze/text
+#   2. Audio recording  → POST /dream-vacation/analyze/audio  (Whisper)
+#   3. Inspiration image→ POST /dream-vacation/analyze/image  (GPT-4o Vision)
+# All three paths converge in _parse_vacation_profile().
+# ════════════════════════════════════════════════════════════════════
+
+_DV_MODEL        = 'gpt-4o'
+_WHISPER_MODEL   = 'whisper-1'
+_MAX_AUDIO_BYTES = 25 * 1024 * 1024   # Whisper hard limit
+_MAX_IMAGE_BYTES = 20 * 1024 * 1024
+
+_ALLOWED_AUDIO_MIME: frozenset[str] = frozenset({
+    'audio/mpeg', 'audio/mp4', 'audio/wav', 'audio/webm',
+    'audio/ogg', 'audio/flac', 'audio/x-m4a',
+})
+_ALLOWED_IMAGE_MIME: frozenset[str] = frozenset({
+    'image/jpeg', 'image/png', 'image/gif', 'image/webp',
+})
+
+# ── Structured output types ──────────────────────────────────
+BudgetLevel   = Literal['low', 'medium', 'high']
+TravelTwinType = Literal[
+    'Explorer', 'Luxury Traveler', 'Nature Escapist',
+    'Urban Discoverer', 'Adrenaline Hunter',
+]
+
+class VacationAnalysis(BaseModel):
+    detected_vibe: str = Field(..., description='Overall emotional vibe in 2-4 words.')
+    requested_weather: str = Field(..., description='Preferred climate or season.')
+    pace: str = Field(..., description='Exactly one of: leisurely, moderate, action-packed.')
+    estimated_budget_level: BudgetLevel = Field(
+        ..., description='low=budget/hostels, medium=3-star, high=luxury/5-star.'
+    )
+
+class VacationProfile(BaseModel):
+    analysis: VacationAnalysis
+    travel_twin: TravelTwinType = Field(
+        ...,
+        description=(
+            'Traveller archetype. Exactly one of: '
+            'Explorer, Luxury Traveler, Nature Escapist, Urban Discoverer, Adrenaline Hunter.'
+        ),
+    )
+    search_query_for_embeddings: str = Field(
+        ...,
+        description=(
+            'One vivid sentence about the trip scenery, vibe, and budget level '
+            'for semantic similarity search over destination packages.'
+        ),
+    )
+
+# ── Request / response wrappers ──────────────────────────────
+class TextAnalysisRequest(BaseModel):
+    text: str = Field(..., min_length=1, max_length=2000)
+
+class VacationProfileResponse(BaseModel):
+    profile: VacationProfile
+    source_text: str = Field(
+        ...,
+        description=(
+            'Text fed into the parser: original input for free text, '
+            'Whisper transcript for audio, or Vision description for images.'
+        ),
+    )
+
+# ── Central parser ────────────────────────────────────────────
+_DV_SYSTEM_PROMPT = """
+You are a travel-profile analyst. Given a description of someone's ideal vacation
+(which may originate from free text, a voice transcript, or a visual scene description),
+extract a structured vacation profile.
+
+Field guidance:
+- detected_vibe              : 2-4 words capturing the emotional tone.
+- requested_weather          : climate or season the traveller prefers.
+- pace                       : exactly one of "leisurely", "moderate", "action-packed".
+- estimated_budget_level     : "low" (budget/hostels), "medium" (3-star), "high" (luxury).
+- travel_twin                : EXACTLY one of —
+                               Explorer | Luxury Traveler | Nature Escapist |
+                               Urban Discoverer | Adrenaline Hunter
+- search_query_for_embeddings: one vivid sentence capturing scenery, vibe, and budget level
+                               for semantic search over destination packages.
+""".strip()
+
+def _parse_vacation_profile(source_text: str) -> VacationProfile:
+    """Central parser: converts any vacation description into a VacationProfile."""
+    text = source_text.strip()
+    if not text:
+        raise HTTPException(status_code=400, detail='source_text must not be empty.')
+    try:
+        completion = client.beta.chat.completions.parse(
+            model=_DV_MODEL,
+            messages=[
+                {'role': 'system', 'content': _DV_SYSTEM_PROMPT},
+                {'role': 'user',   'content': text},
+            ],
+            response_format=VacationProfile,
+            temperature=0.2,
+        )
+    except OpenAIError as exc:
+        raise HTTPException(status_code=503, detail=f'OpenAI error: {exc}') from exc
+    choice = completion.choices[0].message
+    if choice.parsed is None:
+        detail = f'Model refused: {choice.refusal}' if choice.refusal else 'Empty structured response.'
+        raise HTTPException(status_code=422, detail=detail)
+    return choice.parsed
+
+# ── Input handler 1 — free text ───────────────────────────────
+@app.post('/dream-vacation/analyze/text')
+async def dv_analyze_text(req: TextAnalysisRequest) -> VacationProfileResponse:
+    """Analyse a free-text vacation description and return a structured profile."""
+    sanitized = req.text.strip()
+    if not sanitized:
+        raise HTTPException(status_code=400, detail='text must not be empty.')
+    profile = _parse_vacation_profile(sanitized)
+    return VacationProfileResponse(profile=profile, source_text=sanitized)
+
+# ── Input handler 2 — audio (Whisper → text → profile) ────────
+@app.post('/dream-vacation/analyze/audio')
+async def dv_analyze_audio(
+    file: UploadFile = File(..., description='Voice recording (mp3/wav/webm/ogg/flac, max 25 MB).'),
+) -> VacationProfileResponse:
+    """Transcribe a voice recording with Whisper, then return a structured vacation profile."""
+    if not file.filename:
+        raise HTTPException(status_code=400, detail='Uploaded file must have a filename.')
+    file_bytes = await file.read()
+    if len(file_bytes) > _MAX_AUDIO_BYTES:
+        raise HTTPException(status_code=413, detail='Audio file exceeds the 25 MB Whisper limit.')
+    mime = file.content_type or mimetypes.guess_type(file.filename)[0] or 'audio/mpeg'
+    if mime not in _ALLOWED_AUDIO_MIME:
+        raise HTTPException(status_code=415, detail=f"Unsupported audio type '{mime}'.")
+    audio_stream = io.BytesIO(file_bytes)
+    audio_stream.name = file.filename
+    try:
+        transcription = client.audio.transcriptions.create(
+            model=_WHISPER_MODEL,
+            file=audio_stream,
+            response_format='text',
+        )
+    except OpenAIError as exc:
+        raise HTTPException(status_code=503, detail=f'Whisper transcription failed: {exc}') from exc
+    transcript: str = transcription if isinstance(transcription, str) else transcription.text  # type: ignore[union-attr]
+    if not transcript.strip():
+        raise HTTPException(status_code=422, detail='Whisper returned empty transcription.')
+    profile = _parse_vacation_profile(transcript)
+    return VacationProfileResponse(profile=profile, source_text=transcript)
+
+# ── Input handler 3 — image (GPT-4o Vision → description → profile) ─
+_DV_VISION_PROMPT = (
+    'You are looking at an image a traveller shared to describe their dream vacation. '
+    'Describe it in 3-5 sentences focusing on: scenery and landscape, emotional vibe and mood, '
+    'apparent budget/luxury level, climate and weather, pace of activity, '
+    'and any geographic or cultural clues. Be specific and vivid.'
+)
+
+@app.post('/dream-vacation/analyze/image')
+async def dv_analyze_image(
+    file: UploadFile = File(..., description='Vacation inspiration image (jpeg/png/gif/webp, max 20 MB).'),
+) -> VacationProfileResponse:
+    """Describe an image with GPT-4o Vision, then return a structured vacation profile."""
+    file_bytes = await file.read()
+    if len(file_bytes) > _MAX_IMAGE_BYTES:
+        raise HTTPException(status_code=413, detail='Image file exceeds the 20 MB limit.')
+    mime = file.content_type or 'image/jpeg'
+    if mime not in _ALLOWED_IMAGE_MIME:
+        raise HTTPException(status_code=415, detail=f"Unsupported image type '{mime}'.")
+    encoded  = base64.b64encode(file_bytes).decode('utf-8')
+    data_url = f'data:{mime};base64,{encoded}'
+    try:
+        vision_resp = client.chat.completions.create(
+            model=_DV_MODEL,
+            messages=[{
+                'role': 'user',
+                'content': [
+                    {'type': 'text',      'text': _DV_VISION_PROMPT},
+                    {'type': 'image_url', 'image_url': {'url': data_url, 'detail': 'low'}},
+                ],
+            }],
+            max_tokens=400,
+            temperature=0.3,
+        )
+    except OpenAIError as exc:
+        raise HTTPException(status_code=503, detail=f'Vision API failed: {exc}') from exc
+    description: str = vision_resp.choices[0].message.content or ''
+    if not description.strip():
+        raise HTTPException(status_code=422, detail='Vision API returned an empty description.')
+    profile = _parse_vacation_profile(description)
+    return VacationProfileResponse(profile=profile, source_text=description)
+
+
+# ── DREAM VACATION SEMANTIC SEARCH ───────────────────────────────────────────
+# Accepts the search_query_for_embeddings string produced by the profile parser,
+# ranks all indexed products by cosine similarity, and returns the top matches
+# with a one-sentence AI explanation of why each package was chosen.
+# ─────────────────────────────────────────────────────────────────────────────
+
+class DreamSearchRequest(BaseModel):
+    search_query: str = Field(
+        ...,
+        min_length=1,
+        max_length=500,
+        description='The search_query_for_embeddings value from a VacationProfile.',
+    )
+    top_k: int = Field(default=5, ge=1, le=20)
+
+class DreamSearchMatch(BaseModel):
+    product: dict
+    similarity_score: float = Field(..., description='Cosine similarity (0.0–1.0).')
+    why: str = Field(..., description='One sentence explaining why this package fits the query.')
+
+class DreamSearchResponse(BaseModel):
+    query: str
+    matches: list[DreamSearchMatch]
+
+
+def _score_and_explain_matches(
+    query: str,
+    matches: list[tuple[dict, float]],
+) -> list[tuple[str, float]]:
+    """
+    Single GPT call that returns a suitability score AND a 'why' sentence per package.
+    Returns a list of (why_str, relevance_float 0-1) tuples in the same order as ``matches``.
+    Falls back to a neutral score on any error.
+    """
+    if not matches:
+        return []
+
+    package_lines = '\n'.join(
+        f"{i + 1}. {p.get('name', 'Unknown')} (${p.get('price', 'N/A')}): "
+        f"{p.get('description', '')}"
+        for i, (p, _) in enumerate(matches)
+    )
+    prompt = (
+        f"A traveller is looking for: \"{query}\"\n\n"
+        f"The following vacation packages were returned by a vector search:\n"
+        f"{package_lines}\n\n"
+        f"For EACH package:\n"
+        f"  1. Score its relevance: 0.0 = completely unsuitable, 1.0 = perfect match.\n"
+        f"  2. Write exactly ONE sentence (max 20 words) explaining why it does or doesn't fit.\n\n"
+        f"Reply ONLY with a JSON array in the same order, nothing else:\n"
+        f'[{{"score": 0.95, "why": "Perfect warm beach resort with crystal-clear waters."}}, ...]'
+    )
+    try:
+        resp = client.chat.completions.create(
+            model='gpt-4o',
+            messages=[{'role': 'user', 'content': prompt}],
+            max_tokens=400,
+            temperature=0.1,
+        )
+        raw = resp.choices[0].message.content or '[]'
+        raw = raw.strip().removeprefix('```json').removeprefix('```').removesuffix('```').strip()
+        items: list[dict] = json.loads(raw)
+        result: list[tuple[str, float]] = []
+        for item in items[:len(matches)]:
+            result.append((
+                str(item.get('why', 'Matches your travel preferences.')),
+                max(0.0, min(1.0, float(item.get('score', 0.5)))),
+            ))
+        while len(result) < len(matches):
+            result.append(('Matches your travel preferences.', 0.5))
+        return result
+    except (OpenAIError, json.JSONDecodeError, ValueError, KeyError, TypeError):
+        return [('Matches your travel preferences.', 0.5)] * len(matches)
+
+
+@app.post('/dream-vacation/search', response_model=DreamSearchResponse)
+async def dv_search(req: DreamSearchRequest) -> DreamSearchResponse:
+    """
+    Semantic search over the product index using a vacation profile query.
+
+    - Embeds the query with text-embedding-3-small.
+    - Ranks all indexed products by cosine similarity.
+    - Returns the top_k matches, each with a similarity score and a one-sentence
+      AI explanation of why the package suits the traveller's request.
+
+    Requires the product index to be populated (built at startup from products.json
+    or refreshed via POST /index).
+    """
+    query = req.search_query.strip()
+    if not query:
+        raise HTTPException(status_code=400, detail='search_query must not be empty.')
+    if not _product_index:
+        raise HTTPException(
+            status_code=503,
+            detail='Product index is not yet built. Retry in a moment or call POST /index.',
+        )
+
+    # ── Embed query and score all products by cosine similarity ──
+    try:
+        q_vec = _embed(query)
+    except OpenAIError as exc:
+        raise HTTPException(status_code=503, detail=f'Embedding API error: {exc}') from exc
+
+    all_scored: list[tuple[dict, float]] = sorted(
+        (
+            (item['product'], _cosine(q_vec, item['embedding']))
+            for item in _product_index
+        ),
+        key=lambda x: x[1],
+        reverse=True,
+    )
+
+    # Cast a wider net (3× top_k) so GPT can re-rank; drop only near-zero results
+    candidates = [(p, s) for p, s in all_scored[:req.top_k * 3] if s > 0.15]
+
+    if not candidates:
+        return DreamSearchResponse(query=query, matches=[])
+
+    # ── GPT scores relevance AND generates 'why' in a single call ──
+    scored_explanations = _score_and_explain_matches(query, candidates)
+
+    # ── Re-rank: GPT relevance (70%) + cosine similarity (30%) ────
+    combined = [
+        (product, cosine_s, why, gpt_s)
+        for (product, cosine_s), (why, gpt_s)
+        in zip(candidates, scored_explanations)
+    ]
+    combined.sort(key=lambda x: 0.3 * x[1] + 0.7 * x[3], reverse=True)
+
+    top_matches = combined[:req.top_k]
+
+    matches = [
+        DreamSearchMatch(
+            product=product,
+            # Expose the blended score as the similarity_score so the UI badge
+            # reflects true relevance, not raw vector distance
+            similarity_score=round(0.3 * cosine_s + 0.7 * gpt_s, 4),
+            why=why,
+        )
+        for product, cosine_s, why, gpt_s in top_matches
+    ]
+
+    return DreamSearchResponse(query=query, matches=matches)

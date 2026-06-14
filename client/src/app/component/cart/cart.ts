@@ -6,19 +6,21 @@ import { DataViewModule } from 'primeng/dataview';
 import { TagModule } from 'primeng/tag';
 import { CartService } from '../../services/cart.service';
 import { ApiService } from '../../services/api.service';
+import { UserService } from '../../services/user.service';
 import { CommonModule } from '@angular/common';
 import { CartItem } from '../../models/cart.model';
 import { FormsModule } from '@angular/forms';
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
+import { Tooltip } from 'primeng/tooltip';
 import { CheckoutDialog } from '../checkout-dialog/checkout-dialog';
 
 
 @Component({
   selector: 'app-cart',
   standalone: true, 
-  imports: [ButtonModule, DataViewModule, TagModule, CommonModule, RouterLink, FormsModule, ToastModule],
+  imports: [ButtonModule, DataViewModule, TagModule, CommonModule, RouterLink, FormsModule, ToastModule, Tooltip],
   templateUrl: './cart.html',
   styleUrl: './cart.scss',
   providers: [DialogService, MessageService]
@@ -30,14 +32,20 @@ export class Cart implements OnInit, OnDestroy {
   editStartDate = signal<string>('');
   editEndDate = signal<string>('');
   editParticipants = signal<number>(1);
+  editDateError = signal<string>('');
   dialogRef: DynamicDialogRef | undefined;
 
   constructor(
     private cartService: CartService, 
     private apiService: ApiService,
     private dialogService: DialogService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private userService: UserService
   ) {}
+
+  get isAdmin(): boolean {
+    return this.userService.isAdmin();
+  }
 
   ngOnInit() {
     this.cartItems = this.cartService.getCart();
@@ -94,20 +102,46 @@ export class Cart implements OnInit, OnDestroy {
     this.editStartDate.set(this.toDateInputValue(item.startDate));
     this.editEndDate.set(this.toDateInputValue(item.endDate));
     this.editParticipants.set(item.quantity ?? 1);
+    this.editDateError.set('');
   }
 
   cancelEdit() {
     this.editingItemId = null;
+    this.editDateError.set('');
+  }
+
+  onEditStartDateChange(value: string) {
+    this.editStartDate.set(value);
+    this.editDateError.set('');
+    // Clear end date if it's no longer after the new start date
+    if (this.editEndDate() && this.editEndDate() <= value) {
+      this.editEndDate.set('');
+    }
   }
 
   saveEdit(item: CartItem) {
     const startDate = new Date(this.editStartDate());
     const endDate = new Date(this.editEndDate());
     const participants = Number(this.editParticipants());
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
     if (!this.editStartDate() || !this.editEndDate() || participants <= 0) {
+      this.editDateError.set('Please fill in all fields.');
       return;
     }
+
+    if (startDate < today) {
+      this.editDateError.set('Start date cannot be in the past.');
+      return;
+    }
+
+    if (endDate <= startDate) {
+      this.editDateError.set('End date must be after start date (at least 1 night).');
+      return;
+    }
+
+    this.editDateError.set('');
 
     const applyPricing = (basePrice: number, monthConfigs: any[]) => {
       const totalPrice = this.cartService.calculateTotalAmount(
@@ -147,6 +181,17 @@ export class Cart implements OnInit, OnDestroy {
     }
 
     applyPricing(item.basePrice, item.monthConfigs);
+  }
+
+  get todayStr(): string {
+    return this.toDateInputValue(new Date());
+  }
+
+  get editMinEndDateStr(): string {
+    if (!this.editStartDate()) return this.todayStr;
+    const next = new Date(this.editStartDate());
+    next.setDate(next.getDate() + 1);
+    return this.toDateInputValue(next);
   }
 
   private toDateInputValue(value: Date | string): string {

@@ -17,12 +17,20 @@
     <header class="admin-topbar">
       <div class="topbar-content">
         <h1 class="topbar-title">E-Commerce Dashboard</h1>
-        <button pButton 
-                label="Logout" 
-                icon="pi pi-sign-out" 
-                class="p-button-text logout-button"
-                (click)="logout()">
-        </button>
+        <div class="topbar-actions">
+          <button pButton
+                  label="View Store"
+                  icon="pi pi-shopping-bag"
+                  class="p-button-outlined p-button-secondary"
+                  (click)="router.navigate(['/products'])">
+          </button>
+          <button pButton 
+                  label="Logout" 
+                  icon="pi pi-sign-out" 
+                  class="p-button-text logout-button"
+                  (click)="logout()">
+          </button>
+        </div>
       </div>
     </header>
 
